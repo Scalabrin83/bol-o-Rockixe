@@ -225,8 +225,8 @@ export function Admin() {
                   <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{u.phone}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '12px', color: u.status === 'confirmed' ? 'var(--success)' : 'orange' }}>
-                    {u.status === 'confirmed' ? 'Confirmado' : 'Pendente'}
+                  <span style={{ fontSize: '12px', color: u.status === 'confirmed' ? 'var(--success)' : 'orange', fontWeight: 'bold' }}>
+                    {u.status === 'confirmed' ? 'Pago ✅' : 'Pendente ⏳'}
                   </span>
                   <button 
                     onClick={() => toggleUserStatus(u)}
@@ -237,10 +237,11 @@ export function Admin() {
                       backgroundColor: u.status === 'confirmed' ? 'orange' : 'var(--success)',
                       color: '#fff',
                       cursor: 'pointer',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      fontWeight: 'bold'
                     }}
                   >
-                    {u.status === 'confirmed' ? 'Pausar' : 'Aprovar'}
+                    {u.status === 'confirmed' ? 'Desfazer' : 'Confirmar Pagto'}
                   </button>
                   <button 
                     onClick={() => handleDeleteUser(u.uid)}
