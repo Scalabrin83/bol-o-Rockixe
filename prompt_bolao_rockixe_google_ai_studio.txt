@@ -1,0 +1,206 @@
+PROMPT OFICIAL — App Mobile do Bolão Recreativo Copa do Mundo 2026 | Barbearia Rockixe
+
+Objetivo:
+Criar um app mobile-first, bonito, moderno, rápido e responsivo para um jogo recreativo de palpites da Copa do Mundo 2026 da Barbearia Rockixe.
+
+IMPORTANTE:
+Este app deve ser tratado como jogo recreativo/promocional entre clientes. Não implementar apostas esportivas, odds, cotas, integração com casas de apostas, carteira, saque, depósito, cassino, roleta, jogos de azar ou qualquer mecânica de gambling.
+Caso exista prêmio, tratar como prêmio promocional/brinde definido manualmente pelo administrador, sem mecanismos de aposta.
+
+Identidade visual:
+- Visual exclusivamente mobile.
+- Interface premium, masculina, moderna, com clima de Copa do Mundo e identidade da Barbearia Rockixe.
+- O logo da barbearia será enviado pelo usuário e deve ser usado na tela inicial, topo do app e tela final.
+- Criar visual bonito, com cards, ranking elegante, bandeiras, estádio, data e horário.
+- Não fazer layout desktop como prioridade. Tudo deve funcionar perfeitamente no celular.
+
+Stack sugerida:
+- Frontend: React + Vite ou Next.js, mobile-first.
+- Backend/Banco: Firebase/Firestore.
+- Não usar e-mail.
+- Não usar login Google.
+- Login próprio por telefone com DDD + senha.
+- Senha nunca pode ser salva em texto puro. Usar hash seguro.
+- Todos os horários devem ser tratados no fuso America/Sao_Paulo. Pode salvar em UTC, mas exibir e validar em horário de Brasília.
+
+Cadastro e login:
+Cadastro do participante:
+- Nome ou apelido
+- Telefone com DDD
+- Senha
+- Confirmar senha
+- Palpite obrigatório de campeão da Copa
+
+Campo telefone:
+Placeholder obrigatório:
+"Digite seu telefone com DDD. Ex: 11999998888"
+
+Regras:
+- Não pedir e-mail em nenhuma parte.
+- Não permitir login com Google.
+- O telefone é o identificador principal do usuário.
+- Não permitir cadastro completo sem palpite de campeão.
+- Palpite de campeão pode ser editado somente até data/hora limite definida pelo admin.
+
+Perfil do participante:
+- Nome/apelido
+- Telefone
+- Status da inscrição: pendente ou confirmada
+- Palpite de campeão escolhido
+- Pontuação atual
+- Quantidade de placares exatos
+- Nunca permitir que usuário comum altere status de inscrição.
+
+Admin:
+Criar painel admin simples e protegido, com:
+1. Participantes:
+   - Listar participantes.
+   - Ver nome, telefone, status da inscrição, palpite de campeão.
+   - Marcar inscrição como confirmada ou pendente.
+2. Compartilhar:
+   - Link do cadastro.
+   - Botão copiar link.
+   - Mensagem pronta para WhatsApp.
+   - Campo editável com instruções de participação/pagamento permitido apenas como texto informativo, sem integração financeira, sem carteira, sem depósito, sem saque e sem processar pagamentos dentro do app.
+3. Configurações:
+   - Nome do bolão.
+   - Descrição do prêmio/brinde promocional.
+   - Data limite para palpite de campeão.
+   - Campeão oficial da Copa.
+   - Status do bolão: aberto, em andamento, finalizado.
+4. Grupos:
+   - Criar, editar e remover grupos.
+   - O sistema deve nascer com Grupo A até Grupo L.
+5. Seleções:
+   - Criar, editar e remover seleções.
+   - Campos: nome, bandeira, grupo.
+   - Permitir trocar seleção de grupo.
+6. Rodadas/Fases:
+   - Criar rodada com botão "+".
+   - Tipos de fase:
+     - Fase de grupos
+     - 16 avos de final
+     - Oitavas de final
+     - Quartas de final
+     - Semifinal
+     - Disputa de 3º lugar
+     - Final
+   - Cada rodada/fase pode ser liberada ou bloqueada manualmente para palpites.
+7. Jogos:
+   - Dentro de cada rodada, botão "+" para incluir jogo.
+   - Selecionar Time A e Time B a partir das seleções cadastradas.
+   - Campos: data, horário, estádio, cidade, país, grupo/fase, placar oficial, classificado oficial em eliminatórias.
+   - Todos os dados devem ser editáveis.
+   - O sistema deve nascer com seed editável da Copa 2026.
+8. Resultados:
+   - Admin pode lançar resultado jogo por jogo, assim que acabar.
+   - Não exigir fechar uma rodada inteira.
+   - Ao salvar placar oficial, recalcular pontuação/ranking automaticamente.
+   - Em eliminatórias, todo resultado precisa ter classificado oficial.
+
+Seed inicial:
+- Ler o arquivo worldcup2026_seed.json.
+- Criar estrutura inicial de grupos, fases, seleções, jogos, estádios, cidades, países e horários.
+- Todos os dados do seed devem ser editáveis pelo admin.
+- Se algum dado oficial mudar, o admin deve conseguir corrigir sem mexer no código.
+
+Palpites:
+- Palpites são por jogo.
+- Rodadas/fases são liberadas manualmente pelo admin.
+- Mesmo com rodada liberada, cada jogo bloqueia automaticamente no horário de início do jogo.
+- Validação não pode ser só visual. O banco/backend precisa impedir salvar palpite após o horário do jogo.
+- Participantes não veem palpites dos outros.
+- Participantes veem apenas seus próprios palpites, tabela, resultados e rankings.
+
+Pontuação fase de grupos:
+- Acertou vencedor ou empate, mas não placar exato: 3 pontos.
+- Acertou placar exato: 6 pontos.
+- Errou: 0 pontos.
+
+Pontuação eliminatórias:
+Em jogos eliminatórios, a pontuação é dividida em duas partes:
+1. Pontuação pelo placar/resultado:
+   - Placar exato: 6 pontos.
+   - Resultado base correto, mas placar diferente: 3 pontos.
+   - Resultado base errado: 0 pontos.
+2. Pontuação extra pelo classificado:
+   - Acertou quem passa de fase: +3 pontos.
+   - Errou quem passa: +0 pontos.
+Pontuação máxima por jogo eliminatório: 9 pontos.
+
+Regras eliminatórias:
+- O participante sempre deve indicar quem passa de fase.
+- Se o palpite for empate, escolher classificado é obrigatório.
+- Se o palpite tiver vencedor, o sistema pode preencher automaticamente o classificado com o vencedor, mas deve mostrar claramente.
+- No admin, todo jogo eliminatório precisa ter classificado oficial.
+- Se o placar oficial for empate, classificado oficial é obrigatório.
+
+Palpite do campeão:
+- No cadastro, participante escolhe campeão obrigatório.
+- Quando admin definir campeão oficial da Copa, sistema concede +10 pontos no Ranking Geral para quem acertou.
+- Esse bônus não entra no Ranking de Placares Exatos.
+
+Rankings:
+1. Ranking Geral por Pontuação:
+   - Ordenar por maior pontuação.
+   - Mostrar posição, nome/apelido, pontos, placares exatos.
+   - Só considerar jogos com placar oficial lançado.
+   - Somar bônus de campeão quando Copa for finalizada.
+2. Ranking de Placares Exatos:
+   - Conta quantidade de placares exatos.
+   - Não usa pontos.
+   - Serve para brincadeira/zoeira.
+   - Não mostrar palpites dos outros.
+
+Classificação da Copa:
+- Mostrar grupos, seleções, bandeiras, pontos, vitórias, empates, derrotas, gols pró, gols contra, saldo.
+- Calcular automaticamente classificação dos grupos.
+- Indicar 1º e 2º colocados de cada grupo e os 8 melhores terceiros.
+- Admin pode montar manualmente os jogos eliminatórios, mesmo com cálculo automático.
+
+Tela final:
+Quando o admin lançar o último placar e definir o campeão oficial da Copa:
+- Recalcular ranking final.
+- Mostrar tela especial para todos:
+  - Campeão do Bolão Rockixe
+  - Nome/apelido do vencedor
+  - Pontuação final
+  - Descrição do prêmio/brinde
+  - Mensagem de parabéns
+  - Visual forte com logo da Barbearia Rockixe e clima de Copa.
+
+Regras de privacidade:
+- Participante não vê telefone dos outros.
+- Participante não vê palpites dos outros.
+- Admin vê dados necessários.
+- Senhas nunca em texto puro.
+
+Firestore sugerido:
+collections:
+- users
+- admins
+- groups
+- teams
+- stages
+- rounds
+- matches
+- predictions
+- rankings
+- settings
+
+Checklist:
+- Mobile-first.
+- Sem e-mail.
+- Sem Google login.
+- Telefone + senha.
+- Placeholder correto do telefone.
+- Seed editável.
+- Rodadas liberadas manualmente.
+- Bloqueio por horário de cada jogo.
+- Fuso America/Sao_Paulo.
+- Ranking geral.
+- Ranking placares exatos.
+- Palpite obrigatório do campeão.
+- +10 pontos para campeão correto.
+- Eliminatórias com classificado obrigatório.
+- Admin simples e seguro.

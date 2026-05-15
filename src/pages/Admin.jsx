@@ -1,0 +1,412 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { collection, getDocs, doc, setDoc, deleteDoc, getDoc, writeBatch } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+
+export function Admin() {
+  const { userData } = useAuth();
+  const [activeTab, setActiveTab] = useState('users');
+  const [teams, setTeams] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [matches, setMatches] = useState([]);
+  const [stages, setStages] = useState([]);
+  const [rounds, setRounds] = useState([]);
+  const [selectedRound, setSelectedRound] = useState('round_g1');
+  const [newTeam, setNewTeam] = useState({ id: '', name: '', groupId: '' });
+  const [newMatch, setNewMatch] = useState({ stageId: 'group_stage', groupId: 'group_a', teamAId: '', teamBId: '', kickoffLocal: '' });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (userData?.isAdmin) {
+      fetchTeams();
+      fetchUsers();
+      fetchMatches();
+      fetchStages();
+      fetchRounds();
+    }
+  }, [userData]);
+
+  const fetchStages = async () => {
+    const snap = await getDocs(collection(db, 'stages'));
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    data.sort((a, b) => a.order - b.order);
+    setStages(data);
+  };
+
+  const fetchRounds = async () => {
+    const snap = await getDocs(collection(db, 'rounds'));
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    data.sort((a, b) => a.order - b.order);
+    setRounds(data);
+  };
+
+  const fetchMatches = async () => {
+    const snap = await getDocs(collection(db, 'matches'));
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    data.sort((a, b) => new Date(a.kickoffLocal) - new Date(b.kickoffLocal));
+    setMatches(data);
+  };
+
+  const fetchUsers = async () => {
+    const snap = await getDocs(collection(db, 'users'));
+    const data = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+    // Ordena por nome
+    data.sort((a, b) => a.name.localeCompare(b.name));
+    setUsers(data);
+  };
+
+  const fetchTeams = async () => {
+    const snap = await getDocs(collection(db, 'teams'));
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    data.sort((a, b) => a.name.localeCompare(b.name));
+    setTeams(data);
+    setLoading(false);
+  };
+
+  if (!userData?.isAdmin) {
+    return <Navigate to="/" />;
+  }
+
+  const handleAddTeam = async () => {
+    if (!newTeam.id || !newTeam.name) return alert('ID e Nome obrigatórios');
+    try {
+      await setDoc(doc(db, 'teams', newTeam.id), newTeam);
+      alert('Seleção salva com sucesso!');
+      setNewTeam({ id: '', name: '', groupId: '' });
+      fetchTeams();
+    } catch (e) {
+      alert('Erro ao salvar.');
+    }
+  };
+
+  const handleDeleteTeam = async (id) => {
+    if (!window.confirm('Certeza que deseja deletar?')) return;
+    try {
+      await deleteDoc(doc(db, 'teams', id));
+      fetchTeams();
+    } catch (e) {
+      alert('Erro ao deletar.');
+    }
+  };
+
+  const toggleUserStatus = async (user) => {
+    const newStatus = user.status === 'pending' ? 'confirmed' : 'pending';
+    try {
+      await setDoc(doc(db, 'users', user.uid), { status: newStatus }, { merge: true });
+      fetchUsers();
+    } catch (e) {
+      alert('Erro ao atualizar status.');
+    }
+  };
+
+  const toggleStageStatus = async (stage) => {
+    const newStatus = stage.predictionStatus === 'locked' ? 'open' : 'locked';
+    try {
+      await setDoc(doc(db, 'stages', stage.id), { predictionStatus: newStatus }, { merge: true });
+      fetchStages();
+    } catch (e) {
+      alert('Erro ao atualizar fase.');
+    }
+  };
+
+  const handleUpdateMatchTeams = async (matchId, teamAId, teamBId) => {
+    try {
+      await setDoc(doc(db, 'matches', matchId), { teamAId, teamBId }, { merge: true });
+      fetchMatches();
+    } catch (e) {
+      alert('Erro ao salvar times.');
+    }
+  };
+
+  const handleSaveMatchResult = async (matchId, scoreA, scoreB) => {
+    try {
+      await setDoc(doc(db, 'matches', matchId), { 
+        officialScoreA: scoreA, 
+        officialScoreB: scoreB,
+        status: 'finished'
+      }, { merge: true });
+      
+      await recalculateAllScores();
+      alert('Resultado salvo e ranking atualizado com sucesso!');
+      fetchMatches();
+    } catch(e) {
+      console.error(e);
+      alert('Erro ao salvar resultado.');
+    }
+  };
+
+  const recalculateAllScores = async () => {
+    // Busca todos os jogos finalizados
+    const matchesSnap = await getDocs(collection(db, 'matches'));
+    const finishedMatches = matchesSnap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(m => m.status === 'finished');
+
+    const usersSnap = await getDocs(collection(db, 'users'));
+    const batch = writeBatch(db);
+
+    for (const userDoc of usersSnap.docs) {
+      let totalPoints = 0;
+      let totalExact = 0;
+
+      const predSnap = await getDoc(doc(db, 'predictions', userDoc.id));
+      if (predSnap.exists()) {
+        const preds = predSnap.data().matches || {};
+
+        for (const match of finishedMatches) {
+          const pred = preds[match.id];
+          if (!pred) continue; // Não palpitou
+
+          const offA = match.officialScoreA;
+          const offB = match.officialScoreB;
+          const predA = pred.scoreA;
+          const predB = pred.scoreB;
+
+          const isGroupStage = match.stageId === 'group_stage';
+          const ptsForExact = isGroupStage ? 6 : 9;
+          const ptsForWin = isGroupStage ? 3 : 5;
+
+          if (predA === offA && predB === offB) {
+            totalPoints += ptsForExact;
+            totalExact += 1;
+          } else {
+            const offOutcome = offA > offB ? 'A' : offA < offB ? 'B' : 'DRAW';
+            const predOutcome = predA > predB ? 'A' : predA < predB ? 'B' : 'DRAW';
+            if (offOutcome === predOutcome) {
+              totalPoints += ptsForWin;
+            }
+          }
+        }
+      }
+
+      batch.update(doc(db, 'users', userDoc.id), {
+        points: totalPoints,
+        exactScores: totalExact
+      });
+    }
+
+    await batch.commit();
+  };
+
+  return (
+    <div>
+      <h2 style={{ marginBottom: '20px', color: 'var(--primary)' }}>Painel do Admin</h2>
+      
+      <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '20px', paddingBottom: '5px' }}>
+        <Button variant={activeTab === 'users' ? 'primary' : 'secondary'} onClick={() => setActiveTab('users')} style={{whiteSpace:'nowrap'}}>Usuários</Button>
+        <Button variant={activeTab === 'stages' ? 'primary' : 'secondary'} onClick={() => setActiveTab('stages')} style={{whiteSpace:'nowrap'}}>Fases</Button>
+        <Button variant={activeTab === 'teams' ? 'primary' : 'secondary'} onClick={() => setActiveTab('teams')} style={{whiteSpace:'nowrap'}}>Seleções</Button>
+        <Button variant={activeTab === 'matches' ? 'primary' : 'secondary'} onClick={() => setActiveTab('matches')} style={{whiteSpace:'nowrap'}}>Jogos</Button>
+      </div>
+
+      {activeTab === 'users' && (
+        <Card>
+          <h3>Aprovar Participantes</h3>
+          <div style={{ marginTop: '16px' }}>
+            {users.map(u => (
+              <div key={u.uid} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', padding: '12px 0' }}>
+                <div>
+                  <strong style={{ display: 'block' }}>{u.name}</strong>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{u.phone}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '12px', color: u.status === 'confirmed' ? 'var(--success)' : 'orange' }}>
+                    {u.status === 'confirmed' ? 'Confirmado' : 'Pendente'}
+                  </span>
+                  <button 
+                    onClick={() => toggleUserStatus(u)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      backgroundColor: u.status === 'confirmed' ? 'orange' : 'var(--success)',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    {u.status === 'confirmed' ? 'Pausar' : 'Aprovar'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {activeTab === 'stages' && (
+        <Card>
+          <h3>Liberar/Trancar Fases</h3>
+          <p style={{fontSize:'14px', color:'var(--text-muted)', marginTop:'10px', marginBottom: '20px'}}>
+            Fases trancadas impedem qualquer usuário de palpitar nos jogos daquela fase, independente do horário do jogo.
+          </p>
+          <div style={{ marginTop: '16px' }}>
+            {stages.map(s => (
+              <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', padding: '12px 0' }}>
+                <strong style={{ display: 'block' }}>{s.name}</strong>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '12px', color: s.predictionStatus === 'open' ? 'var(--success)' : 'var(--error)' }}>
+                    {s.predictionStatus === 'open' ? 'Aberta' : 'Trancada'}
+                  </span>
+                  <button 
+                    onClick={() => toggleStageStatus(s)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      backgroundColor: s.predictionStatus === 'open' ? 'var(--error)' : 'var(--success)',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    {s.predictionStatus === 'open' ? 'Trancar' : 'Liberar'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {activeTab === 'teams' && (
+        <Card>
+          <h3>Gerenciar Seleções</h3>
+          
+          <div style={{ margin: '20px 0', padding: '16px', background: 'var(--bg-dark)', borderRadius: '8px' }}>
+            <h4 style={{marginBottom:'10px'}}>Nova Seleção</h4>
+            <Input label="ID (ex: brazil)" value={newTeam.id} onChange={e => setNewTeam({...newTeam, id: e.target.value})} />
+            <Input label="Nome (ex: Brasil)" value={newTeam.name} onChange={e => setNewTeam({...newTeam, name: e.target.value})} />
+            <Input label="Grupo (ex: group_g)" value={newTeam.groupId} onChange={e => setNewTeam({...newTeam, groupId: e.target.value})} />
+            <Button onClick={handleAddTeam}>Adicionar / Salvar</Button>
+          </div>
+
+          <div>
+            {teams.map(team => (
+              <div key={team.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems:'center', borderBottom: '1px solid var(--border-color)', padding: '10px 0' }}>
+                <div>
+                  <strong>{team.name}</strong> <span style={{fontSize:'12px', color:'var(--text-muted)'}}>({team.groupId})</span>
+                </div>
+                <button onClick={() => handleDeleteTeam(team.id)} style={{ background:'transparent', color:'var(--error)', border:'none', cursor:'pointer' }}>Excluir</button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+      
+      {activeTab === 'matches' && (
+        <Card>
+          <h3>Gerenciar Jogos</h3>
+          <p style={{fontSize:'13px', color:'var(--text-muted)', marginTop:'8px', marginBottom:'16px'}}>
+            Selecione a rodada, escolha os times de cada jogo e lance resultados.
+          </p>
+
+          <select 
+            value={selectedRound} 
+            onChange={e => setSelectedRound(e.target.value)}
+            style={{width:'100%', padding:'12px', borderRadius:'8px', marginBottom:'20px', background:'var(--bg-dark)', color:'#fff', border:'1px solid var(--border-color)', fontSize:'15px'}}
+          >
+            {rounds.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+          </select>
+
+          {matches.filter(m => m.roundId === selectedRound).map(m => (
+            <MatchRow 
+              key={m.id} 
+              match={m} 
+              teams={teams} 
+              onSave={handleSaveMatchResult}
+              onUpdateTeams={handleUpdateMatchTeams}
+            />
+          ))}
+
+          {matches.filter(m => m.roundId === selectedRound).length === 0 && (
+            <p style={{textAlign:'center', color:'var(--text-muted)', padding:'20px'}}>Nenhum jogo nesta rodada.</p>
+          )}
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function MatchRow({ match: m, teams, onSave, onUpdateTeams }) {
+  const [localScoreA, setLocalScoreA] = useState(m.officialScoreA ?? '');
+  const [localScoreB, setLocalScoreB] = useState(m.officialScoreB ?? '');
+  const [teamA, setTeamA] = useState(m.teamAId || '');
+  const [teamB, setTeamB] = useState(m.teamBId || '');
+  const [saving, setSaving] = useState(false);
+
+  const selStyle = { width:'100%', padding:'8px', borderRadius:'6px', background:'var(--bg-dark)', color:'#fff', border:'1px solid var(--border-color)', fontSize:'13px' };
+  const teamAName = teams.find(t => t.id === m.teamAId)?.name;
+  const teamBName = teams.find(t => t.id === m.teamBId)?.name;
+  const isFinished = m.status === 'finished';
+
+  const handleSaveTeams = async () => {
+    if (!teamA || !teamB) return alert('Selecione as duas seleções.');
+    setSaving(true);
+    await onUpdateTeams(m.id, teamA, teamB);
+    setSaving(false);
+  };
+
+  return (
+    <div style={{ borderBottom: '1px solid var(--border-color)', padding:'16px 0', display:'flex', flexDirection:'column', gap:'10px' }}>
+      {/* Header: número, grupo, data, estádio */}
+      <div style={{ textAlign:'center' }}>
+        <div style={{ fontSize:'11px', color:'var(--text-muted)' }}>
+          Jogo {m.matchNumber} {m.groupId ? `• ${m.groupId.replace('group_','Grupo ').toUpperCase()}` : ''}
+        </div>
+        <div style={{ fontSize:'14px', fontWeight:'bold', color:'var(--primary)', marginTop:'2px' }}>
+          {new Date(m.kickoffLocal).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}
+        </div>
+        <div style={{ fontSize:'11px', color:'var(--text-muted)' }}>{m.stadium} — {m.city}</div>
+      </div>
+
+      {/* Seleção de times */}
+      {!m.teamAId || !m.teamBId ? (
+        <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+          <select value={teamA} onChange={e => setTeamA(e.target.value)} style={selStyle}>
+            <option value=''>Seleção A...</option>
+            {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+          <div style={{textAlign:'center', fontSize:'12px', color:'var(--text-muted)'}}>VS</div>
+          <select value={teamB} onChange={e => setTeamB(e.target.value)} style={selStyle}>
+            <option value=''>Seleção B...</option>
+            {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+          <Button onClick={handleSaveTeams} disabled={saving} style={{padding:'8px', fontSize:'13px'}}>
+            {saving ? 'Salvando...' : 'Definir Times'}
+          </Button>
+        </div>
+      ) : (
+        <>
+          {/* Times já definidos + placar */}
+          <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'12px' }}>
+            <div style={{ flex:1, textAlign:'right', fontWeight:'bold', fontSize:'15px' }}>{teamAName}</div>
+            <div style={{ display:'flex', gap:'6px', alignItems:'center' }}>
+              <input type="number" value={localScoreA} onChange={e => setLocalScoreA(e.target.value)}
+                style={{ width:'38px', height:'38px', textAlign:'center', fontSize:'18px', borderRadius:'6px', border:'1px solid var(--border-color)', background:'var(--bg-dark)', color:'#fff' }} />
+              <span style={{fontWeight:'bold'}}>X</span>
+              <input type="number" value={localScoreB} onChange={e => setLocalScoreB(e.target.value)}
+                style={{ width:'38px', height:'38px', textAlign:'center', fontSize:'18px', borderRadius:'6px', border:'1px solid var(--border-color)', background:'var(--bg-dark)', color:'#fff' }} />
+            </div>
+            <div style={{ flex:1, textAlign:'left', fontWeight:'bold', fontSize:'15px' }}>{teamBName}</div>
+          </div>
+
+          {!isFinished && (
+            <Button variant="secondary" onClick={() => onSave(m.id, parseInt(localScoreA,10), parseInt(localScoreB,10))}
+              style={{ alignSelf:'center', padding:'6px 14px', fontSize:'12px', width:'auto' }}>
+              Salvar Resultado Oficial
+            </Button>
+          )}
+          {isFinished && (
+            <div style={{textAlign:'center', fontSize:'12px', color:'var(--success)', fontWeight:'bold'}}>✓ ENCERRADO ({m.officialScoreA} x {m.officialScoreB})</div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

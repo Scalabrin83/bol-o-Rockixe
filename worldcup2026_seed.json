@@ -1,0 +1,250 @@
+{
+  "metadata": {
+    "name": "worldcup2026_seed",
+    "app": "Bolão Recreativo Copa do Mundo 2026 - Barbearia Rockixe",
+    "timezone": "America/Sao_Paulo",
+    "source_note": "Seed estrutural inicial. Complete/valide os 104 jogos contra a tabela oficial FIFA antes de produção. Todos os dados devem ser editáveis pelo admin.",
+    "created_at": "2026-05-13",
+    "format": "mobile_firebase_firestore_seed_v1"
+  },
+  "settings": {
+    "poolName": "Bolão Copa do Mundo 2026 | Barbearia Rockixe",
+    "status": "open",
+    "championPredictionDeadline": "2026-06-11T15:59:00-03:00",
+    "officialChampionTeamId": null,
+    "prizeDescription": "Definir no painel admin",
+    "phonePlaceholder": "Digite seu telefone com DDD. Ex: 11999998888",
+    "allowEmailLogin": false,
+    "allowGoogleLogin": false
+  },
+  "scoringRules": {
+    "groupStage": {
+      "exactScore": 6,
+      "correctOutcome": 3,
+      "wrong": 0
+    },
+    "knockout": {
+      "exactScore": 6,
+      "correctOutcome": 3,
+      "wrong": 0,
+      "qualifiedTeamBonus": 3,
+      "maxPerMatch": 9
+    },
+    "championBonus": 10
+  },
+  "stages": [
+    {
+      "id": "group_stage",
+      "name": "Fase de grupos",
+      "type": "group",
+      "order": 1,
+      "predictionStatus": "locked"
+    },
+    {
+      "id": "round_of_32",
+      "name": "16 avos de final",
+      "type": "knockout",
+      "order": 2,
+      "predictionStatus": "locked"
+    },
+    {
+      "id": "round_of_16",
+      "name": "Oitavas de final",
+      "type": "knockout",
+      "order": 3,
+      "predictionStatus": "locked"
+    },
+    {
+      "id": "quarterfinals",
+      "name": "Quartas de final",
+      "type": "knockout",
+      "order": 4,
+      "predictionStatus": "locked"
+    },
+    {
+      "id": "semifinals",
+      "name": "Semifinal",
+      "type": "knockout",
+      "order": 5,
+      "predictionStatus": "locked"
+    },
+    {
+      "id": "third_place",
+      "name": "Disputa de 3º lugar",
+      "type": "knockout",
+      "order": 6,
+      "predictionStatus": "locked"
+    },
+    {
+      "id": "final",
+      "name": "Final",
+      "type": "knockout",
+      "order": 7,
+      "predictionStatus": "locked"
+    }
+  ],
+  "groups": [
+    {
+      "id": "group_a",
+      "name": "Grupo A",
+      "order": 1
+    },
+    {
+      "id": "group_b",
+      "name": "Grupo B",
+      "order": 2
+    },
+    {
+      "id": "group_c",
+      "name": "Grupo C",
+      "order": 3
+    },
+    {
+      "id": "group_d",
+      "name": "Grupo D",
+      "order": 4
+    },
+    {
+      "id": "group_e",
+      "name": "Grupo E",
+      "order": 5
+    },
+    {
+      "id": "group_f",
+      "name": "Grupo F",
+      "order": 6
+    },
+    {
+      "id": "group_g",
+      "name": "Grupo G",
+      "order": 7
+    },
+    {
+      "id": "group_h",
+      "name": "Grupo H",
+      "order": 8
+    },
+    {
+      "id": "group_i",
+      "name": "Grupo I",
+      "order": 9
+    },
+    {
+      "id": "group_j",
+      "name": "Grupo J",
+      "order": 10
+    },
+    {
+      "id": "group_k",
+      "name": "Grupo K",
+      "order": 11
+    },
+    {
+      "id": "group_l",
+      "name": "Grupo L",
+      "order": 12
+    }
+  ],
+  "teams": [
+    { "id": "eua", "name": "Estados Unidos", "groupId": "group_a", "flagUrl": "" },
+    { "id": "mexico", "name": "México", "groupId": "group_a", "flagUrl": "" },
+    { "id": "canada", "name": "Canadá", "groupId": "group_a", "flagUrl": "" },
+    { "id": "brasil", "name": "Brasil", "groupId": "group_b", "flagUrl": "" },
+    { "id": "argentina", "name": "Argentina", "groupId": "group_b", "flagUrl": "" },
+    { "id": "uruguai", "name": "Uruguai", "groupId": "group_b", "flagUrl": "" },
+    { "id": "colombia", "name": "Colômbia", "groupId": "group_c", "flagUrl": "" },
+    { "id": "equador", "name": "Equador", "groupId": "group_c", "flagUrl": "" },
+    { "id": "venezuela", "name": "Venezuela", "groupId": "group_c", "flagUrl": "" },
+    { "id": "franca", "name": "França", "groupId": "group_d", "flagUrl": "" },
+    { "id": "inglaterra", "name": "Inglaterra", "groupId": "group_d", "flagUrl": "" },
+    { "id": "espanha", "name": "Espanha", "groupId": "group_d", "flagUrl": "" },
+    { "id": "alemanha", "name": "Alemanha", "groupId": "group_e", "flagUrl": "" },
+    { "id": "portugal", "name": "Portugal", "groupId": "group_e", "flagUrl": "" },
+    { "id": "italia", "name": "Itália", "groupId": "group_e", "flagUrl": "" },
+    { "id": "holanda", "name": "Holanda", "groupId": "group_f", "flagUrl": "" },
+    { "id": "croacia", "name": "Croácia", "groupId": "group_f", "flagUrl": "" },
+    { "id": "belgica", "name": "Bélgica", "groupId": "group_f", "flagUrl": "" },
+    { "id": "suica", "name": "Suíça", "groupId": "group_g", "flagUrl": "" },
+    { "id": "dinamarca", "name": "Dinamarca", "groupId": "group_g", "flagUrl": "" },
+    { "id": "austria", "name": "Áustria", "groupId": "group_g", "flagUrl": "" },
+    { "id": "servia", "name": "Sérvia", "groupId": "group_h", "flagUrl": "" },
+    { "id": "suecia", "name": "Suécia", "groupId": "group_h", "flagUrl": "" },
+    { "id": "polonia", "name": "Polônia", "groupId": "group_h", "flagUrl": "" },
+    { "id": "ucrania", "name": "Ucrânia", "groupId": "group_i", "flagUrl": "" },
+    { "id": "marrocos", "name": "Marrocos", "groupId": "group_i", "flagUrl": "" },
+    { "id": "senegal", "name": "Senegal", "groupId": "group_i", "flagUrl": "" },
+    { "id": "egito", "name": "Egito", "groupId": "group_j", "flagUrl": "" },
+    { "id": "argelia", "name": "Argélia", "groupId": "group_j", "flagUrl": "" },
+    { "id": "camaroes", "name": "Camarões", "groupId": "group_j", "flagUrl": "" },
+    { "id": "nigeria", "name": "Nigéria", "groupId": "group_k", "flagUrl": "" },
+    { "id": "costa_marfim", "name": "Costa do Marfim", "groupId": "group_k", "flagUrl": "" },
+    { "id": "gana", "name": "Gana", "groupId": "group_k", "flagUrl": "" },
+    { "id": "tunisia", "name": "Tunísia", "groupId": "group_l", "flagUrl": "" },
+    { "id": "japao", "name": "Japão", "groupId": "group_l", "flagUrl": "" },
+    { "id": "coreia_sul", "name": "Coreia do Sul", "groupId": "group_l", "flagUrl": "" },
+    { "id": "ira", "name": "Irã", "groupId": "group_a", "flagUrl": "" },
+    { "id": "australia", "name": "Austrália", "groupId": "group_b", "flagUrl": "" },
+    { "id": "arabia_saudita", "name": "Arábia Saudita", "groupId": "group_c", "flagUrl": "" },
+    { "id": "catar", "name": "Catar", "groupId": "group_d", "flagUrl": "" },
+    { "id": "uzbequistao", "name": "Uzbequistão", "groupId": "group_e", "flagUrl": "" },
+    { "id": "emirados", "name": "Emirados Árabes", "groupId": "group_f", "flagUrl": "" },
+    { "id": "costa_rica", "name": "Costa Rica", "groupId": "group_g", "flagUrl": "" },
+    { "id": "panama", "name": "Panamá", "groupId": "group_h", "flagUrl": "" },
+    { "id": "jamaica", "name": "Jamaica", "groupId": "group_i", "flagUrl": "" },
+    { "id": "nova_zelandia", "name": "Nova Zelândia", "groupId": "group_j", "flagUrl": "" },
+    { "id": "peru", "name": "Peru", "groupId": "group_k", "flagUrl": "" },
+    { "id": "honduras", "name": "Honduras", "groupId": "group_l", "flagUrl": "" }
+  ],
+  "matches": [
+    {
+      "id": "match_001",
+      "matchNumber": 1,
+      "stageId": "group_stage",
+      "roundName": "Rodada 1",
+      "groupId": "group_a",
+      "teamAName": "Mexico",
+      "teamBName": "South Africa",
+      "teamAId": null,
+      "teamBId": null,
+      "kickoffLocal": "2026-06-11T16:00:00-03:00",
+      "timezone": "America/Sao_Paulo",
+      "stadium": "Mexico City Stadium / Estadio Azteca",
+      "city": "Mexico City",
+      "country": "Mexico",
+      "predictionStatus": "locked",
+      "officialScoreA": null,
+      "officialScoreB": null,
+      "officialQualifiedTeamId": null,
+      "status": "scheduled",
+      "editableByAdmin": true
+    },
+    {
+      "id": "match_002",
+      "matchNumber": 2,
+      "stageId": "group_stage",
+      "roundName": "Rodada 1",
+      "groupId": "group_a",
+      "teamAName": "South Korea",
+      "teamBName": "Czech Republic",
+      "teamAId": null,
+      "teamBId": null,
+      "kickoffLocal": "2026-06-12T00:00:00-03:00",
+      "timezone": "America/Sao_Paulo",
+      "stadium": "Guadalajara Stadium / Estadio Akron",
+      "city": "Guadalajara/Zapopan",
+      "country": "Mexico",
+      "predictionStatus": "locked",
+      "officialScoreA": null,
+      "officialScoreB": null,
+      "officialQualifiedTeamId": null,
+      "status": "scheduled",
+      "editableByAdmin": true
+    }
+  ],
+  "importInstructions": [
+    "Este arquivo já define a estrutura do app e inclui exemplos oficiais iniciais.",
+    "Antes de produção, completar teams[] e matches[] com os 104 jogos oficiais confirmados.",
+    "Manter todos os jogos bloqueados inicialmente.",
+    "Permitir edição total pelo admin após importação."
+  ]
+}
