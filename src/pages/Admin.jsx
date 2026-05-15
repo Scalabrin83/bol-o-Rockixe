@@ -103,6 +103,17 @@ export function Admin() {
     }
   };
 
+  const handleDeleteUser = async (uid) => {
+    if (!window.confirm('Certeza que deseja deletar este usuário permanentemente? Todos os palpites e dados dele serão apagados.')) return;
+    try {
+      await deleteDoc(doc(db, 'users', uid));
+      await deleteDoc(doc(db, 'predictions', uid));
+      fetchUsers();
+    } catch(e) {
+      alert('Erro ao excluir usuário');
+    }
+  };
+
   const toggleStageStatus = async (stage) => {
     const newStatus = stage.predictionStatus === 'locked' ? 'open' : 'locked';
     try {
@@ -230,6 +241,20 @@ export function Admin() {
                     }}
                   >
                     {u.status === 'confirmed' ? 'Pausar' : 'Aprovar'}
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteUser(u.uid)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      color: 'var(--error)',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Excluir
                   </button>
                 </div>
               </div>

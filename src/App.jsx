@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { BottomNav } from './components/layout/BottomNav';
@@ -16,15 +16,23 @@ function PrivateRoute({ children }) {
   return currentUser ? children : <Navigate to="/login" />;
 }
 
-// Layout com Header e BottomNav
+// Layout com Header e BottomNav condicional
 function AppLayout({ children }) {
+  const { userData } = useAuth();
+  const location = useLocation();
+
+  // Bloqueia usuários pendentes na Home
+  if (userData?.status === 'pending' && location.pathname !== '/') {
+    return <Navigate to="/" replace />;
+  }
+
   return (
     <div className="app-container">
       <Header />
       <main className="main-content">
         {children}
       </main>
-      <BottomNav />
+      {userData?.status !== 'pending' && <BottomNav />}
     </div>
   );
 }

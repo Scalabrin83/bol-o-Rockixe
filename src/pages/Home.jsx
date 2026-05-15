@@ -38,36 +38,65 @@ export function Home() {
     window.open(`https://wa.me/?text=${encodeURIComponent(shareMessage)}`, '_blank');
   };
 
+  // Tela Exclusiva para Usuários Pendentes
+  if (isPending) {
+    const whatsAppMessage = encodeURIComponent(`Olá Renato, segue o comprovante do meu pagamento do bolão! Meu usuário é: ${userData.name}`);
+    const whatsappLink = `https://wa.me/5511971927447?text=${whatsAppMessage}`;
+
+    return (
+      <div className="animate-in" style={{ textAlign: 'center' }}>
+        <h2 className="section-title" style={{ marginBottom: 30 }}>
+          Olá, <span>{userData.name}</span>!
+        </h2>
+
+        <div className="card card--gold" style={{ padding: '30px 20px', marginBottom: 20 }}>
+          <div style={{ fontSize: 48, marginBottom: 15 }}>⏳</div>
+          <h3 style={{ color: 'var(--warning)', fontSize: 20, fontWeight: 800, marginBottom: 10 }}>Inscrição Pendente</h3>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 25 }}>
+            Para liberar seu acesso total e confirmar sua participação no bolão, realize o pagamento da taxa de inscrição.
+          </p>
+
+          <div style={{ background: 'var(--bg-dark)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(251,191,36,0.3)', marginBottom: 25 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 5 }}>Valor da Inscrição</div>
+            <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--primary)', marginBottom: 20 }}>R$ 50,00</div>
+
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 5 }}>Chave PIX (E-mail)</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', userSelect: 'all', wordBreak: 'break-all' }}>
+              r_scalabrin@hotmail.com
+            </div>
+          </div>
+
+          <a 
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn--primary" 
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', fontSize: 15, padding: '14px', background: '#25D366', color: '#fff', border: 'none' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            Enviar Comprovante
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Tela Normal para Usuários Confirmados (Admin ou Aprovados)
   return (
     <div className="animate-in">
       <h2 className="section-title">
         Olá, <span>{userData.name}</span>!
       </h2>
 
-      {isPending && (
-        <div className="card" style={{ borderColor: 'rgba(251,191,36,0.3)', marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <span style={{ fontSize: 20 }}>⏳</span>
-            <h3 style={{ color: 'var(--warning)', fontSize: 15, fontWeight: 700 }}>Inscrição Pendente</h3>
-          </div>
-          <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-            Sua inscrição no bolão está pendente de confirmação pelo administrador.
-            Você já pode visualizar os jogos, mas seus palpites só valerão após a aprovação.
-          </p>
+      <div className="card" style={{ borderColor: 'rgba(52,211,153,0.3)', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <span style={{ fontSize: 20 }}>✅</span>
+          <h3 style={{ color: 'var(--success)', fontSize: 15, fontWeight: 700 }}>Inscrição Confirmada</h3>
         </div>
-      )}
-
-      {!isPending && (
-        <div className="card" style={{ borderColor: 'rgba(52,211,153,0.3)', marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <span style={{ fontSize: 20 }}>✅</span>
-            <h3 style={{ color: 'var(--success)', fontSize: 15, fontWeight: 700 }}>Inscrição Confirmada</h3>
-          </div>
-          <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-            Sua participação está confirmada! Boa sorte nos seus palpites. 🍀
-          </p>
-        </div>
-      )}
+        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+          Sua participação está confirmada! Boa sorte nos seus palpites. 🍀
+        </p>
+      </div>
 
       <div className="stat-grid">
         <div className="stat-card">
