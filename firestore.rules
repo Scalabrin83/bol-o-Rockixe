@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Função para verificar se o usuário logado é o Administrador
+    function isAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // ------------------------------------
+    // COLEÇÃO DE USUÁRIOS (users)
+    // ------------------------------------
+    match /users/{userId} {
+      // Todos podem ler (para o Ranking e Totalizadores funcionarem)
+      allow read: if true;
+      
+      // O usuário pode criar seu próprio perfil apenas no momento do cadastro
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // NENHUM usuário pode alterar seus próprios dados (para não burlarem pontos e status)
+      // Somente o Administrador tem poder de alterar ou apagar usuários
+      allow update, delete: if isAdmin();
+    }
+
+    // ------------------------------------
+    // COLEÇÃO DE PALPITES (predictions)
+    // ------------------------------------
+    match /predictions/{predictionId} {
+      // Todos podem ler (se no futuro quiser mostrar palpites alheios)
+      allow read: if true;
+      
+      // O apostador pode gravar no SEU PRÓPRIO documento de palpites
+      // Ninguém consegue alterar o palpite de outra pessoa
+      allow create, update: if request.auth != null && request.auth.uid == predictionId;
+      
+      // Somente admin pode deletar os palpites (quando ele expulsa alguém)
+      allow delete: if isAdmin();
+    }
+
+    // ------------------------------------
+    // COLEÇÃO DE JOGOS (matches)
+    // ------------------------------------
+    match /matches/{matchId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ------------------------------------
+    // COLEÇÃO DE SELEÇÕES (teams)
+    // ------------------------------------
+    match /teams/{teamId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ------------------------------------
+    // COLEÇÃO DE RODADAS (rounds)
+    // ------------------------------------
+    match /rounds/{roundId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
