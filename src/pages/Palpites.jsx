@@ -175,6 +175,18 @@ export function Palpites() {
           );
         }
 
+        return (
+          <div key={match.id} className={`match-card ${isLocked ? 'match-card--locked' : ''} ${hasSaved ? 'match-card--saved' : ''}`}>
+            <div className="match-card__header">
+              <div className="match-card__group">{groupLabel}</div>
+              <div className="match-card__time">
+                {new Date(match.kickoffLocal).toLocaleString('pt-BR', { 
+                  day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' 
+                })}
+              </div>
+              <div className="match-card__stadium">{match.stadium}</div>
+            </div>
+
             <div className="match-card__teams">
               <div className="match-card__team match-card__team--left">
                 <div className="match-card__team-name" style={{ display: 'flex', alignItems: 'center' }}>
