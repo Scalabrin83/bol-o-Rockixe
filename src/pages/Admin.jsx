@@ -114,13 +114,13 @@ export function Admin() {
     }
   };
 
-  const toggleStageStatus = async (stage) => {
-    const newStatus = stage.predictionStatus === 'locked' ? 'open' : 'locked';
+  const toggleRoundStatus = async (round) => {
+    const newStatus = round.predictionStatus === 'locked' ? 'open' : 'locked';
     try {
-      await setDoc(doc(db, 'stages', stage.id), { predictionStatus: newStatus }, { merge: true });
-      fetchStages();
+      await setDoc(doc(db, 'rounds', round.id), { predictionStatus: newStatus }, { merge: true });
+      fetchRounds();
     } catch (e) {
-      alert('Erro ao atualizar fase.');
+      alert('Erro ao atualizar rodada.');
     }
   };
 
@@ -209,7 +209,7 @@ export function Admin() {
       
       <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '20px', paddingBottom: '5px' }}>
         <Button variant={activeTab === 'users' ? 'primary' : 'secondary'} onClick={() => setActiveTab('users')} style={{whiteSpace:'nowrap'}}>Usuários</Button>
-        <Button variant={activeTab === 'stages' ? 'primary' : 'secondary'} onClick={() => setActiveTab('stages')} style={{whiteSpace:'nowrap'}}>Fases</Button>
+        <Button variant={activeTab === 'stages' ? 'primary' : 'secondary'} onClick={() => setActiveTab('stages')} style={{whiteSpace:'nowrap'}}>Rodadas</Button>
         <Button variant={activeTab === 'teams' ? 'primary' : 'secondary'} onClick={() => setActiveTab('teams')} style={{whiteSpace:'nowrap'}}>Seleções</Button>
         <Button variant={activeTab === 'matches' ? 'primary' : 'secondary'} onClick={() => setActiveTab('matches')} style={{whiteSpace:'nowrap'}}>Jogos</Button>
       </div>
@@ -265,32 +265,32 @@ export function Admin() {
 
       {activeTab === 'stages' && (
         <Card>
-          <h3>Liberar/Trancar Fases</h3>
+          <h3>Liberar/Trancar Rodadas</h3>
           <p style={{fontSize:'14px', color:'var(--text-muted)', marginTop:'10px', marginBottom: '20px'}}>
-            Fases trancadas impedem qualquer usuário de palpitar nos jogos daquela fase, independente do horário do jogo.
+            Rodadas trancadas impedem qualquer usuário de palpitar nos jogos daquela rodada, independente do horário do jogo.
           </p>
           <div style={{ marginTop: '16px' }}>
-            {stages.map(s => (
-              <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', padding: '12px 0' }}>
-                <strong style={{ display: 'block' }}>{s.name}</strong>
+            {rounds.map(r => (
+              <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', padding: '12px 0' }}>
+                <strong style={{ display: 'block' }}>{r.name}</strong>
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '12px', color: s.predictionStatus === 'open' ? 'var(--success)' : 'var(--error)' }}>
-                    {s.predictionStatus === 'open' ? 'Aberta' : 'Trancada'}
+                  <span style={{ fontSize: '12px', color: r.predictionStatus === 'open' ? 'var(--success)' : 'var(--error)' }}>
+                    {r.predictionStatus === 'open' ? 'Aberta' : 'Trancada'}
                   </span>
                   <button 
-                    onClick={() => toggleStageStatus(s)}
+                    onClick={() => toggleRoundStatus(r)}
                     style={{
                       padding: '6px 12px',
                       borderRadius: '4px',
                       border: 'none',
-                      backgroundColor: s.predictionStatus === 'open' ? 'var(--error)' : 'var(--success)',
+                      backgroundColor: r.predictionStatus === 'open' ? 'var(--error)' : 'var(--success)',
                       color: '#fff',
                       cursor: 'pointer',
                       fontSize: '12px'
                     }}
                   >
-                    {s.predictionStatus === 'open' ? 'Trancar' : 'Liberar'}
+                    {r.predictionStatus === 'open' ? 'Trancar' : 'Liberar'}
                   </button>
                 </div>
               </div>

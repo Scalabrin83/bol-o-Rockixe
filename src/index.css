@@ -586,6 +586,9 @@ select.input-group__field {
   padding-bottom: 8px;
   margin-bottom: 16px;
   scrollbar-width: none;
+  max-width: 100vw;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 20px;
 }
 .round-selector::-webkit-scrollbar { display: none; }
 
