@@ -205,7 +205,7 @@ export function Admin() {
 
   return (
     <div>
-      <h2 style={{ marginBottom: '20px', color: 'var(--primary)' }}>Painel do Admin</h2>
+      <h2 className="section-title"><span>Painel Admin</span></h2>
       
       <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '20px', paddingBottom: '5px' }}>
         <Button variant={activeTab === 'users' ? 'primary' : 'secondary'} onClick={() => setActiveTab('users')} style={{whiteSpace:'nowrap'}}>Usuários</Button>

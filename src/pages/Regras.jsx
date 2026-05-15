@@ -46,10 +46,11 @@ export function Regras() {
           <li>Acerto de <strong>Vencedor/Empate</strong>: 5 pontos</li>
         </ul>
 
-        <h4 style={{ fontSize: '15px', color: '#fff', marginTop: '15px', marginBottom: '5px' }}>Bônus Especial</h4>
-        <p style={{ fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)', margin: 0 }}>
-          O palpite do <strong>Time Campeão</strong> (definido no momento do seu cadastro) renderá um bônus de <strong>10 pontos extras</strong> no final do campeonato caso você acerte!
-        </p>
+        <h4 style={{ fontSize: '15px', color: '#fff', marginTop: '15px', marginBottom: '5px' }}>Bônus Especiais</h4>
+        <ul style={{ fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)', paddingLeft: '20px', margin: 0 }}>
+          <li style={{ marginBottom: '8px' }}>O palpite do <strong>Time Campeão</strong> (definido no momento do seu cadastro) renderá um bônus de <strong>10 pontos extras</strong> no final do campeonato caso você acerte!</li>
+          <li>O participante que terminar o bolão com o <strong>maior número de Placares Exatos</strong> ganhará mais <strong>10 pontos extras</strong> na contagem final!</li>
+        </ul>
       </div>
 
       <div className="card" style={{ marginBottom: '20px', borderColor: 'rgba(212,168,67,0.3)' }}>

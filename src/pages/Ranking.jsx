@@ -21,8 +21,7 @@ export function Ranking() {
 
         const data = usersSnap.docs
           .map(d => ({ uid: d.id, ...d.data() }))
-          // Mostra todos que estão aprovados. Se for admin, só mostra se tiver escolhido um campeão (ou seja, se estiver participando)
-          .filter(u => u.status === 'approved' && (!u.isAdmin || u.championTeamId));
+          .filter(u => u.status === 'confirmed' && (!u.isAdmin || u.championTeamId));
           
         setUsers(data);
       } catch (e) {
@@ -55,15 +54,17 @@ export function Ranking() {
     <div className="animate-in">
       <h2 className="section-title"><span>Ranking</span></h2>
 
-      <div className="round-selector" style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', width: '100%', gap: '8px', marginBottom: '20px' }}>
         <button 
           className={`round-selector__btn ${tab === 'geral' ? 'round-selector__btn--active' : ''}`}
+          style={{ flex: 1, textAlign: 'center' }}
           onClick={() => setTab('geral')}
         >
           Geral (Pontos)
         </button>
         <button 
           className={`round-selector__btn ${tab === 'exatos' ? 'round-selector__btn--active' : ''}`}
+          style={{ flex: 1, textAlign: 'center' }}
           onClick={() => setTab('exatos')}
         >
           Placares Exatos
