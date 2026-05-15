@@ -10,15 +10,28 @@ const APP_URL = 'https://bolao.barbeariarockixe.com.br';
 export function Home() {
   const { userData } = useAuth();
   const [teams, setTeams] = useState({});
+  const [stats, setStats] = useState({ totalUsers: 0, totalPot: 0 });
 
   useEffect(() => {
-    const fetchTeams = async () => {
-      const snap = await getDocs(collection(db, 'teams'));
+    const fetchData = async () => {
+      // Buscar times
+      const teamsSnap = await getDocs(collection(db, 'teams'));
       const obj = {};
-      snap.docs.forEach(d => { obj[d.id] = d.data(); });
+      teamsSnap.docs.forEach(d => { obj[d.id] = d.data(); });
       setTeams(obj);
+
+      // Buscar total de pagantes
+      const usersSnap = await getDocs(collection(db, 'users'));
+      let confirmedCount = 0;
+      usersSnap.docs.forEach(d => {
+        if (d.data().status === 'confirmed') confirmedCount++;
+      });
+      setStats({
+        totalUsers: confirmedCount,
+        totalPot: confirmedCount * 50
+      });
     };
-    fetchTeams();
+    fetchData();
   }, []);
 
   if (!userData) return null;
@@ -36,6 +49,46 @@ export function Home() {
       } catch (e) { /* fallback */ }
     }
     window.open(`https://wa.me/?text=${encodeURIComponent(shareMessage)}`, '_blank');
+  };
+
+  // Componente do Bloco de Premiação
+  const PrizePoolBlock = () => {
+    const pot = stats.totalPot;
+    const firstPrize = pot * 0.7;
+    const secondPrize = pot * 0.2;
+    const thirdPrize = pot * 0.1;
+
+    return (
+      <div className="card" style={{ marginBottom: 20, borderColor: 'rgba(212,168,67,0.3)', padding: '20px 15px' }}>
+        <h3 style={{ color: 'var(--primary)', marginBottom: '15px', fontSize: '18px', textAlign: 'center', fontWeight: 800 }}>Premiação Atual</h3>
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', background: 'var(--bg-dark)', padding: '12px', borderRadius: '8px' }}>
+          <div style={{ textAlign: 'center', flex: 1, borderRight: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Participantes</div>
+            <div style={{ fontSize: '20px', fontWeight: 800, color: '#fff' }}>{stats.totalUsers}</div>
+          </div>
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Arrecadação Total</div>
+            <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--primary)' }}>R$ {pot},00</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ background: 'var(--bg-dark)', padding: '10px 15px', borderRadius: '8px', borderLeft: '4px solid var(--primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <strong style={{ color: '#fff', fontSize: '14px' }}>🥇 1º Colocado <span style={{fontSize:'11px', color:'var(--text-muted)'}}>(70%)</span></strong>
+            <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '16px' }}>R$ {firstPrize.toFixed(2).replace('.', ',')}</span>
+          </div>
+          <div style={{ background: 'var(--bg-dark)', padding: '10px 15px', borderRadius: '8px', borderLeft: '4px solid #C0C0C0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <strong style={{ color: '#fff', fontSize: '14px' }}>🥈 2º Colocado <span style={{fontSize:'11px', color:'var(--text-muted)'}}>(20%)</span></strong>
+            <span style={{ color: '#C0C0C0', fontWeight: 800, fontSize: '16px' }}>R$ {secondPrize.toFixed(2).replace('.', ',')}</span>
+          </div>
+          <div style={{ background: 'var(--bg-dark)', padding: '10px 15px', borderRadius: '8px', borderLeft: '4px solid #CD7F32', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <strong style={{ color: '#fff', fontSize: '14px' }}>🥉 3º Colocado <span style={{fontSize:'11px', color:'var(--text-muted)'}}>(10%)</span></strong>
+            <span style={{ color: '#CD7F32', fontWeight: 800, fontSize: '16px' }}>R$ {thirdPrize.toFixed(2).replace('.', ',')}</span>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Tela Exclusiva para Usuários Pendentes
@@ -65,6 +118,8 @@ export function Home() {
               r_scalabrin@hotmail.com
             </div>
           </div>
+
+          <PrizePoolBlock />
 
           <a 
             href={whatsappLink}
@@ -97,6 +152,8 @@ export function Home() {
           Sua participação está confirmada! Boa sorte nos seus palpites. 🍀
         </p>
       </div>
+
+      <PrizePoolBlock />
 
       <div className="stat-grid">
         <div className="stat-card">

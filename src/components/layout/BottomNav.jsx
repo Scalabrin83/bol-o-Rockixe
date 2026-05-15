@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Trophy, List, Table2, Settings } from 'lucide-react';
+import { Home, Trophy, List, Table2, Settings, BookOpen } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function BottomNav() {
@@ -15,6 +15,7 @@ export function BottomNav() {
     { path: '/palpites', icon: List, label: 'Palpites' },
     { path: '/classificacao', icon: Table2, label: 'Grupos' },
     { path: '/ranking', icon: Trophy, label: 'Ranking' },
+    { path: '/regras', icon: BookOpen, label: 'Regras' },
   ];
   if (userData?.isAdmin) {
     items.push({ path: '/admin', icon: Settings, label: 'Admin' });

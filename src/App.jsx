@@ -8,6 +8,7 @@ import { Home } from './pages/Home';
 import { Palpites } from './pages/Palpites';
 import { Ranking } from './pages/Ranking';
 import { Classificacao } from './pages/Classificacao';
+import { Regras } from './pages/Regras';
 import { Admin } from './pages/Admin';
 
 // Protege rotas que precisam de login
@@ -62,6 +63,13 @@ function App() {
             <PrivateRoute>
               <AppLayout>
                 <Classificacao />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          <Route path="/regras" element={
+            <PrivateRoute>
+              <AppLayout>
+                <Regras />
               </AppLayout>
             </PrivateRoute>
           } />
