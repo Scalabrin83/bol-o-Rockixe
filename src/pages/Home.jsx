@@ -5,7 +5,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 // Troque pela URL real após fazer o deploy na Hostinger
-const APP_URL = 'https://www.barbeariarockixe.com.br/bolao';
+const APP_URL = 'https://bolao.barbeariarockixe.com.br';
 
 export function Home() {
   const { userData } = useAuth();
