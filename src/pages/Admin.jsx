@@ -141,8 +141,7 @@ export function Admin() {
         status: 'finished'
       }, { merge: true });
       
-      await recalculateAllScores();
-      alert('Resultado salvo e ranking atualizado com sucesso!');
+      alert('Resultado salvo com sucesso! Clique no botão de Recalcular Pontos para atualizar o ranking.');
       fetchMatches();
     } catch(e) {
       console.error(e);
@@ -151,56 +150,96 @@ export function Admin() {
   };
 
   const recalculateAllScores = async () => {
-    // Busca todos os jogos finalizados
-    const matchesSnap = await getDocs(collection(db, 'matches'));
-    const finishedMatches = matchesSnap.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .filter(m => m.status === 'finished');
+    try {
+      const matchesSnap = await getDocs(collection(db, 'matches'));
+      const finishedMatches = matchesSnap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(m => m.status === 'finished');
 
-    const usersSnap = await getDocs(collection(db, 'users'));
-    const batch = writeBatch(db);
+      // Descobre o campeão se a final já acabou
+      let championId = null;
+      const finalMatch = finishedMatches.find(m => m.roundId === 'final');
+      if (finalMatch) {
+        if (finalMatch.officialScoreA > finalMatch.officialScoreB) championId = finalMatch.teamAId;
+        else if (finalMatch.officialScoreB > finalMatch.officialScoreA) championId = finalMatch.teamBId;
+      }
 
-    for (const userDoc of usersSnap.docs) {
-      let totalPoints = 0;
-      let totalExact = 0;
+      const usersSnap = await getDocs(collection(db, 'users'));
+      const usersData = [];
+      let maxExactScores = 0;
 
-      const predSnap = await getDoc(doc(db, 'predictions', userDoc.id));
-      if (predSnap.exists()) {
-        const preds = predSnap.data().matches || {};
+      for (const userDoc of usersSnap.docs) {
+        let totalPoints = 0;
+        let totalExact = 0;
 
-        for (const match of finishedMatches) {
-          const pred = preds[match.id];
-          if (!pred) continue; // Não palpitou
+        const predSnap = await getDoc(doc(db, 'predictions', userDoc.id));
+        if (predSnap.exists()) {
+          const preds = predSnap.data().matches || {};
 
-          const offA = match.officialScoreA;
-          const offB = match.officialScoreB;
-          const predA = pred.scoreA;
-          const predB = pred.scoreB;
+          for (const match of finishedMatches) {
+            const pred = preds[match.id];
+            if (!pred) continue;
+            if (pred.scoreA === '' || pred.scoreB === '') continue; // Ignora palpite em branco
 
-          const isGroupStage = match.stageId === 'group_stage';
-          const ptsForExact = isGroupStage ? 6 : 9;
-          const ptsForWin = isGroupStage ? 3 : 5;
+            const offA = parseInt(match.officialScoreA);
+            const offB = parseInt(match.officialScoreB);
+            const predA = parseInt(pred.scoreA);
+            const predB = parseInt(pred.scoreB);
 
-          if (predA === offA && predB === offB) {
-            totalPoints += ptsForExact;
-            totalExact += 1;
-          } else {
-            const offOutcome = offA > offB ? 'A' : offA < offB ? 'B' : 'DRAW';
-            const predOutcome = predA > predB ? 'A' : predA < predB ? 'B' : 'DRAW';
-            if (offOutcome === predOutcome) {
-              totalPoints += ptsForWin;
+            const isGroupStage = !!match.groupId;
+            const ptsForExact = isGroupStage ? 6 : 9;
+            const ptsForWin = isGroupStage ? 3 : 5;
+
+            if (predA === offA && predB === offB) {
+              totalPoints += ptsForExact;
+              totalExact += 1;
+            } else {
+              const offOutcome = offA > offB ? 'A' : offA < offB ? 'B' : 'DRAW';
+              const predOutcome = predA > predB ? 'A' : predA < predB ? 'B' : 'DRAW';
+              if (offOutcome === predOutcome) {
+                totalPoints += ptsForWin;
+              }
             }
           }
         }
+        
+        if (totalExact > maxExactScores) maxExactScores = totalExact;
+
+        usersData.push({
+          id: userDoc.id,
+          championTeamId: userDoc.data().championTeamId,
+          basePoints: totalPoints,
+          baseExact: totalExact
+        });
       }
 
-      batch.update(doc(db, 'users', userDoc.id), {
-        points: totalPoints,
-        exactScores: totalExact
-      });
-    }
+      const batch = writeBatch(db);
+      for (const u of usersData) {
+        let finalPoints = u.basePoints;
+        
+        // Bônus de Maior Acertador de Exatos
+        if (maxExactScores > 0 && u.baseExact === maxExactScores) {
+          finalPoints += 10;
+        }
+        
+        // Bônus de Campeão
+        if (championId && u.championTeamId === championId) {
+          finalPoints += 10;
+        }
 
-    await batch.commit();
+        batch.update(doc(db, 'users', u.id), {
+          points: finalPoints,
+          exactScores: u.baseExact
+        });
+      }
+
+      await batch.commit();
+      alert('Pontuações recalculadas com sucesso! Todos os bônus foram aplicados.');
+      fetchUsers(); // Atualiza a tela se necessário
+    } catch (e) {
+      console.error(e);
+      alert('Erro ao recalcular pontuações.');
+    }
   };
 
   return (
@@ -327,7 +366,12 @@ export function Admin() {
       
       {activeTab === 'matches' && (
         <Card>
-          <h3>Gerenciar Jogos</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h3>Resultados Oficiais</h3>
+            <Button onClick={recalculateAllScores} style={{ background: 'var(--success)', color: '#fff', border: 'none' }}>
+              🔄 Recalcular Pontos
+            </Button>
+          </div>
           <p style={{fontSize:'13px', color:'var(--text-muted)', marginTop:'8px', marginBottom:'16px'}}>
             Selecione a rodada, escolha os times de cada jogo e lance resultados.
           </p>
