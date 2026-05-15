@@ -41,10 +41,17 @@ export function Regras() {
         </ul>
 
         <h4 style={{ fontSize: '15px', color: '#fff', marginTop: '15px', marginBottom: '5px' }}>Fase Eliminatória (Mata-mata)</h4>
+        <p style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-secondary)', marginBottom: '5px' }}>
+          No mata-mata a pontuação é dividida em duas partes: o resultado dos 90 minutos (ou prorrogação) e o time que avançar de fase.
+        </p>
         <ul style={{ fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)', paddingLeft: '20px', margin: 0 }}>
-          <li style={{ marginBottom: '4px' }}>Acerto de <strong>Placar Exato</strong>: 9 pontos</li>
-          <li>Acerto de <strong>Vencedor/Empate</strong>: 5 pontos</li>
+          <li style={{ marginBottom: '4px' }}>Acerto do <strong>Placar Exato</strong> (90 min/prorrogação): 6 pontos</li>
+          <li style={{ marginBottom: '4px' }}>Acerto apenas do <strong>Vencedor/Empate</strong>: 3 pontos</li>
+          <li>Acerto de <strong>Quem avança de fase (Quem passa)</strong>: +3 pontos bônus</li>
         </ul>
+        <div style={{ background: 'var(--bg-dark)', padding: '10px', borderRadius: '8px', marginTop: '10px', fontSize: '12px', color: 'var(--text-muted)' }}>
+          <em>Exemplo:</em> Se você apostar que dá Empate, o sistema pedirá para você escolher quem passa nos pênaltis. Se você acertar o placar do empate (6pts) e quem passou nos pênaltis (+3pts), você leva os 9 pontos cheios.
+        </div>
 
         <h4 style={{ fontSize: '15px', color: '#fff', marginTop: '15px', marginBottom: '5px' }}>Bônus Especiais</h4>
         <ul style={{ fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)', paddingLeft: '20px', margin: 0 }}>

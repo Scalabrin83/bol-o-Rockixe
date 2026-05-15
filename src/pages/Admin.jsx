@@ -133,11 +133,12 @@ export function Admin() {
     }
   };
 
-  const handleSaveMatchResult = async (matchId, scoreA, scoreB) => {
+  const handleSaveMatchResult = async (matchId, scoreA, scoreB, penaltyWinnerId) => {
     try {
       await setDoc(doc(db, 'matches', matchId), { 
         officialScoreA: scoreA, 
         officialScoreB: scoreB,
+        officialPenaltyWinnerId: penaltyWinnerId || null,
         status: 'finished'
       }, { merge: true });
       
@@ -186,9 +187,23 @@ export function Admin() {
             const predA = parseInt(pred.scoreA);
             const predB = parseInt(pred.scoreB);
 
-            const isGroupStage = !!match.groupId;
-            const ptsForExact = isGroupStage ? 6 : 9;
-            const ptsForWin = isGroupStage ? 3 : 5;
+            const isKnockout = !match.groupId;
+            const ptsForExact = isKnockout ? 6 : 6;
+            const ptsForWin = isKnockout ? 3 : 3;
+
+            // Quem passa de fase
+            let offQualifier = null;
+            let predQualifier = null;
+
+            if (isKnockout) {
+              if (offA > offB) offQualifier = match.teamAId;
+              else if (offB > offA) offQualifier = match.teamBId;
+              else offQualifier = match.officialPenaltyWinnerId;
+
+              if (predA > predB) predQualifier = match.teamAId;
+              else if (predB > predA) predQualifier = match.teamBId;
+              else predQualifier = pred.penaltyWinnerId;
+            }
 
             if (predA === offA && predB === offB) {
               totalPoints += ptsForExact;
@@ -199,6 +214,11 @@ export function Admin() {
               if (offOutcome === predOutcome) {
                 totalPoints += ptsForWin;
               }
+            }
+
+            // Bônus de "quem passa" no mata-mata
+            if (isKnockout && offQualifier && predQualifier === offQualifier) {
+              totalPoints += 3;
             }
           }
         }
@@ -408,12 +428,17 @@ function MatchRow({ match: m, teams, onSave, onUpdateTeams }) {
   const [localScoreB, setLocalScoreB] = useState(m.officialScoreB ?? '');
   const [teamA, setTeamA] = useState(m.teamAId || '');
   const [teamB, setTeamB] = useState(m.teamBId || '');
+  const [localPenaltyWinnerId, setLocalPenaltyWinnerId] = useState(m.officialPenaltyWinnerId || '');
   const [saving, setSaving] = useState(false);
 
   const selStyle = { width:'100%', padding:'8px', borderRadius:'6px', background:'var(--bg-dark)', color:'#fff', border:'1px solid var(--border-color)', fontSize:'13px' };
   const teamAName = teams.find(t => t.id === m.teamAId)?.name;
   const teamBName = teams.find(t => t.id === m.teamBId)?.name;
   const isFinished = m.status === 'finished';
+  
+  const isKnockout = !m.groupId;
+  const isTie = localScoreA !== '' && localScoreB !== '' && localScoreA === localScoreB;
+  const needsPenaltyWinner = isKnockout && isTie;
 
   const handleSaveTeams = async () => {
     if (!teamA || !teamB) return alert('Selecione as duas seleções.');
@@ -466,12 +491,25 @@ function MatchRow({ match: m, teams, onSave, onUpdateTeams }) {
             <div style={{ flex:1, textAlign:'left', fontWeight:'bold', fontSize:'15px' }}>{teamBName}</div>
           </div>
 
-          {!isFinished && (
-            <Button variant="secondary" onClick={() => onSave(m.id, parseInt(localScoreA,10), parseInt(localScoreB,10))}
-              style={{ alignSelf:'center', padding:'6px 14px', fontSize:'12px', width:'auto' }}>
-              Salvar Resultado Oficial
-            </Button>
-          )}
+            {needsPenaltyWinner && !isFinished && (
+              <div style={{ marginTop: '10px', padding: '10px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid rgba(212,168,67,0.3)', alignSelf: 'center' }}>
+                <div style={{ fontSize: '11px', textAlign: 'center', marginBottom: '5px', color: 'var(--primary)' }}>QUEM VENCEU NOS PÊNALTIS?</div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => setLocalPenaltyWinnerId(m.teamAId)} style={{ padding: '6px', borderRadius: '4px', background: localPenaltyWinnerId === m.teamAId ? 'var(--primary)' : 'transparent', color: localPenaltyWinnerId === m.teamAId ? '#000' : '#fff', border: '1px solid var(--primary)', cursor: 'pointer', fontSize: '12px' }}>{teamAName}</button>
+                  <button onClick={() => setLocalPenaltyWinnerId(m.teamBId)} style={{ padding: '6px', borderRadius: '4px', background: localPenaltyWinnerId === m.teamBId ? 'var(--primary)' : 'transparent', color: localPenaltyWinnerId === m.teamBId ? '#000' : '#fff', border: '1px solid var(--primary)', cursor: 'pointer', fontSize: '12px' }}>{teamBName}</button>
+                </div>
+              </div>
+            )}
+
+            {!isFinished && (
+              <Button variant="secondary" onClick={() => {
+                if (needsPenaltyWinner && !localPenaltyWinnerId) return alert('Selecione quem venceu nos pênaltis.');
+                onSave(m.id, parseInt(localScoreA,10), parseInt(localScoreB,10), localPenaltyWinnerId);
+              }}
+                style={{ alignSelf:'center', padding:'6px 14px', fontSize:'12px', width:'auto', marginTop: '10px' }}>
+                Salvar Resultado Oficial
+              </Button>
+            )}
           {isFinished && (
             <div style={{textAlign:'center', fontSize:'12px', color:'var(--success)', fontWeight:'bold'}}>✓ ENCERRADO ({m.officialScoreA} x {m.officialScoreB})</div>
           )}

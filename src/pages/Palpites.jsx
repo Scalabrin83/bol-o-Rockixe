@@ -151,6 +151,10 @@ export function Palpites() {
         const teamA = teams[match.teamAId];
         const teamB = teams[match.teamBId];
 
+        const isKnockout = !match.groupId;
+        const needsPenaltyWinner = isKnockout && pred.scoreA !== undefined && pred.scoreB !== undefined && pred.scoreA !== '' && pred.scoreB !== '' && pred.scoreA === pred.scoreB;
+        const isSaveDisabled = saving || (needsPenaltyWinner && !pred.penaltyWinnerId);
+
         const groupLabel = match.groupId ? match.groupId.replace('group_', 'Grupo ').toUpperCase() : (currentRound?.name || '');
 
         if (!match.teamAId || !match.teamBId) {
@@ -221,9 +225,33 @@ export function Palpites() {
               </div>
             </div>
 
-            <div className="match-card__action" style={{ textAlign: 'center' }}>
+            {needsPenaltyWinner && (
+              <div style={{ marginTop: '15px', padding: '12px', background: 'var(--bg-dark)', borderRadius: '8px', border: '1px solid rgba(212,168,67,0.2)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--primary)', textAlign: 'center', marginBottom: '8px', fontWeight: 600 }}>
+                  QUEM AVANÇA NOS PÊNALTIS?
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button 
+                    onClick={() => handleScoreChange(match.id, 'penaltyWinnerId', match.teamAId)}
+                    disabled={isLocked}
+                    style={{ flex: 1, padding: '8px', borderRadius: '6px', border: pred.penaltyWinnerId === match.teamAId ? '2px solid var(--primary)' : '1px solid var(--border-color)', background: pred.penaltyWinnerId === match.teamAId ? 'rgba(212,168,67,0.1)' : 'transparent', color: '#fff', cursor: isLocked ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: '14px' }}
+                  >
+                    {teamA?.name}
+                  </button>
+                  <button 
+                    onClick={() => handleScoreChange(match.id, 'penaltyWinnerId', match.teamBId)}
+                    disabled={isLocked}
+                    style={{ flex: 1, padding: '8px', borderRadius: '6px', border: pred.penaltyWinnerId === match.teamBId ? '2px solid var(--primary)' : '1px solid var(--border-color)', background: pred.penaltyWinnerId === match.teamBId ? 'rgba(212,168,67,0.1)' : 'transparent', color: '#fff', cursor: isLocked ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: '14px' }}
+                  >
+                    {teamB?.name}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="match-card__action" style={{ textAlign: 'center', marginTop: needsPenaltyWinner ? '15px' : '0' }}>
               {!isLocked && (
-                <Button size="sm" onClick={() => handleSavePrediction(match)} disabled={saving}>
+                <Button size="sm" onClick={() => handleSavePrediction(match)} disabled={isSaveDisabled}>
                   Salvar Palpite
                 </Button>
               )}
