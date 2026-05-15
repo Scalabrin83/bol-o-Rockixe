@@ -98,9 +98,13 @@ export function Palpites() {
     return (
       <div className="animate-in">
         <h2 className="section-title">Meus <span>Palpites</span></h2>
-        <div className="card" style={{ borderColor: 'rgba(251,191,36,0.3)' }}>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
-            ⏳ Você poderá salvar seus palpites assim que o administrador confirmar sua inscrição.
+        <div className="card" style={{ borderColor: 'rgba(251,191,36,0.3)', textAlign: 'center', padding: '30px 20px', marginTop: '40px' }}>
+          <div style={{ fontSize: 40, marginBottom: 15 }}>🔒</div>
+          <h3 style={{ color: 'var(--warning)', fontSize: 18, fontWeight: 700, marginBottom: 10 }}>Palpites Bloqueados</h3>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+            Você precisa confirmar o pagamento da inscrição para começar a jogar.
+            <br/><br/>
+            Acesse a aba <strong style={{color: '#fff'}}>Início</strong> para ver a chave PIX e enviar o comprovante para o administrador.
           </p>
         </div>
       </div>

@@ -16,15 +16,10 @@ function PrivateRoute({ children }) {
   return currentUser ? children : <Navigate to="/login" />;
 }
 
-// Layout com Header e BottomNav condicional
+// Layout com Header e BottomNav
 function AppLayout({ children }) {
   const { userData } = useAuth();
   const location = useLocation();
-
-  // Bloqueia usuários pendentes na Home
-  if (userData?.status === 'pending' && location.pathname !== '/') {
-    return <Navigate to="/" replace />;
-  }
 
   return (
     <div className="app-container">
@@ -32,7 +27,7 @@ function AppLayout({ children }) {
       <main className="main-content">
         {children}
       </main>
-      {userData?.status !== 'pending' && <BottomNav />}
+      <BottomNav />
     </div>
   );
 }
