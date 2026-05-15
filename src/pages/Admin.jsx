@@ -413,10 +413,10 @@ function MatchRow({ match: m, teams, onSave, onUpdateTeams }) {
           <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'12px' }}>
             <div style={{ flex:1, textAlign:'right', fontWeight:'bold', fontSize:'15px' }}>{teamAName}</div>
             <div style={{ display:'flex', gap:'6px', alignItems:'center' }}>
-              <input type="number" value={localScoreA} onChange={e => setLocalScoreA(e.target.value)}
+              <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength="2" value={localScoreA} onChange={e => setLocalScoreA(e.target.value)}
                 style={{ width:'38px', height:'38px', textAlign:'center', fontSize:'18px', borderRadius:'6px', border:'1px solid var(--border-color)', background:'var(--bg-dark)', color:'#fff' }} />
               <span style={{fontWeight:'bold'}}>X</span>
-              <input type="number" value={localScoreB} onChange={e => setLocalScoreB(e.target.value)}
+              <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength="2" value={localScoreB} onChange={e => setLocalScoreB(e.target.value)}
                 style={{ width:'38px', height:'38px', textAlign:'center', fontSize:'18px', borderRadius:'6px', border:'1px solid var(--border-color)', background:'var(--bg-dark)', color:'#fff' }} />
             </div>
             <div style={{ flex:1, textAlign:'left', fontWeight:'bold', fontSize:'15px' }}>{teamBName}</div>

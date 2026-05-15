@@ -151,21 +151,29 @@ export function Palpites() {
         const teamA = teams[match.teamAId];
         const teamB = teams[match.teamBId];
 
-        if (!match.teamAId || !match.teamBId) return null; // Skip matches without teams
+        const groupLabel = match.groupId ? match.groupId.replace('group_', 'Grupo ').toUpperCase() : (currentRound?.name || '');
 
-        const groupLabel = match.groupId ? match.groupId.replace('group_', 'Grupo ').toUpperCase() : match.roundName;
-
-        return (
-          <div key={match.id} className={`match-card ${isLocked ? 'match-card--locked' : ''} ${hasSaved ? 'match-card--saved' : ''}`}>
-            <div className="match-card__header">
-              <div className="match-card__group">{groupLabel}</div>
-              <div className="match-card__time">
-                {new Date(match.kickoffLocal).toLocaleString('pt-BR', { 
-                  day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' 
-                })}
+        if (!match.teamAId || !match.teamBId) {
+          return (
+            <div key={match.id} className={`match-card match-card--locked`}>
+              <div className="match-card__header">
+                <div className="match-card__group">{groupLabel}</div>
+                <div className="match-card__time">
+                  {new Date(match.kickoffLocal).toLocaleString('pt-BR', { 
+                    day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' 
+                  })}
+                </div>
+                <div className="match-card__stadium">{match.stadium}</div>
               </div>
-              <div className="match-card__stadium">{match.stadium}</div>
+              <div className="match-card__teams" style={{ justifyContent: 'center', opacity: 0.6, padding: '20px 0' }}>
+                <div style={{ fontSize: '14px', fontWeight: 'bold' }}>A DEFINIR</div>
+              </div>
+              <div className="match-card__action" style={{ textAlign: 'center' }}>
+                <span className="match-card__badge match-card__badge--locked">Aguardando Classificação</span>
+              </div>
             </div>
+          );
+        }
 
             <div className="match-card__teams">
               <div className="match-card__team match-card__team--left">
@@ -178,7 +186,7 @@ export function Palpites() {
               <div className="match-card__scores">
                 <input
                   className="match-card__score-input"
-                  type="tel" maxLength="2"
+                  type="text" inputMode="numeric" pattern="[0-9]*" maxLength="2"
                   value={pred.scoreA ?? ''}
                   onChange={e => handleScoreChange(match.id, 'scoreA', e.target.value)}
                   disabled={isLocked}
@@ -186,7 +194,7 @@ export function Palpites() {
                 <span className="match-card__vs">×</span>
                 <input
                   className="match-card__score-input"
-                  type="tel" maxLength="2"
+                  type="text" inputMode="numeric" pattern="[0-9]*" maxLength="2"
                   value={pred.scoreB ?? ''}
                   onChange={e => handleScoreChange(match.id, 'scoreB', e.target.value)}
                   disabled={isLocked}
