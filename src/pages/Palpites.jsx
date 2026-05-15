@@ -4,6 +4,7 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { isAfter, parseISO } from 'date-fns';
+import { TEAM_FLAGS } from '../utils/flags';
 
 export function Palpites() {
   const { userData, currentUser } = useAuth();
@@ -168,7 +169,10 @@ export function Palpites() {
 
             <div className="match-card__teams">
               <div className="match-card__team match-card__team--left">
-                <div className="match-card__team-name">{teamA?.name || '—'}</div>
+                <div className="match-card__team-name" style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ marginRight: '6px', fontSize: '16px' }}>{TEAM_FLAGS[match.teamAId] || '🏳️'}</span>
+                  {teamA?.name || '—'}
+                </div>
               </div>
 
               <div className="match-card__scores">
@@ -190,7 +194,10 @@ export function Palpites() {
               </div>
 
               <div className="match-card__team match-card__team--right">
-                <div className="match-card__team-name">{teamB?.name || '—'}</div>
+                <div className="match-card__team-name" style={{ display: 'flex', alignItems: 'center' }}>
+                  {teamB?.name || '—'}
+                  <span style={{ marginLeft: '6px', fontSize: '16px' }}>{TEAM_FLAGS[match.teamBId] || '🏳️'}</span>
+                </div>
               </div>
             </div>
 
