@@ -105,6 +105,21 @@ export function Home() {
           Olá, <span>{userData.name}</span>!
         </h2>
 
+        <div style={{ marginBottom: 20, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 8 }}>
+            Acesse o grupo do bolão no whats app
+          </div>
+          <a
+            href={groupLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn--secondary"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 700 }}
+          >
+            GRUPO DO BOLÃO
+          </a>
+        </div>
+
         <div className="card card--gold" style={{ padding: '30px 20px', marginBottom: 20 }}>
           <div style={{ fontSize: 48, marginBottom: 15 }}>⏳</div>
           <h3 style={{ color: 'var(--warning)', fontSize: 20, fontWeight: 800, marginBottom: 10 }}>Inscrição Pendente</h3>
@@ -158,6 +173,21 @@ export function Home() {
       <h2 className="section-title">
         Olá, <span>{userData.name}</span>!
       </h2>
+
+      <div style={{ marginBottom: 20, textAlign: 'center' }}>
+        <div style={{ fontSize: 14, color: 'var(--text-secondary)', fontWeight: 700, marginBottom: 8 }}>
+          Acesse o grupo do bolão no whats app
+        </div>
+        <a
+          href={groupLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn btn--secondary"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 700 }}
+        >
+          GRUPO DO BOLÃO
+        </a>
+      </div>
 
       <div className="card" style={{ borderColor: 'rgba(52,211,153,0.3)', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
