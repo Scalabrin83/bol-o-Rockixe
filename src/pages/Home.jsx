@@ -136,17 +136,17 @@ export function Home() {
           </a>
         
             <div style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 8 }}>Acesse o grupo do bolão no whats app</div>
-              <a
-                href={groupLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn--ghost"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%' }}
-              >
-                Entrar no Grupo do Bolão (WhatsApp)
-              </a>
-            </div>
+            <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 8 }}>Acesse o grupo do bolão no whats app</div>
+            <a
+              href={groupLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn--secondary"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%' }}
+            >
+              grupo Bolão
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -211,10 +211,10 @@ export function Home() {
           href={groupLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn btn--ghost"
+          className="btn btn--secondary"
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%' }}
         >
-          Entrar no Grupo do Bolão (WhatsApp)
+          grupo Bolão
         </a>
       </div>
     </div>
