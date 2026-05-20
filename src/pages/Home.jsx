@@ -188,13 +188,11 @@ export function Home() {
       </div>
 
       {showConfirmedPopup && (
-        <div className="card" style={{ borderColor: 'rgba(52,211,153,0.3)', background: 'rgba(52,211,153,0.08)', marginBottom: 20, padding: '18px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--success)', marginBottom: 6 }}>Pagamento confirmado!</div>
-              <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-secondary)', margin: 0 }}>
-                Seu pagamento foi aprovado e sua participação já está liberada.
-              </p>
+        <div className="card" style={{ borderColor: 'rgba(52,211,153,0.3)', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20 }}>✅</span>
+              <h3 style={{ color: 'var(--success)', fontSize: 15, fontWeight: 700, margin: 0 }}>Inscrição Confirmada</h3>
             </div>
             <button
               onClick={() => setShowConfirmedPopup(false)}
@@ -204,18 +202,11 @@ export function Home() {
               ×
             </button>
           </div>
+          <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+            Sua participação está confirmada! Boa sorte nos seus palpites. 🍀
+          </p>
         </div>
       )}
-
-      <div className="card" style={{ borderColor: 'rgba(52,211,153,0.3)', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <span style={{ fontSize: 20 }}>✅</span>
-          <h3 style={{ color: 'var(--success)', fontSize: 15, fontWeight: 700 }}>Inscrição Confirmada</h3>
-        </div>
-        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-          Sua participação está confirmada! Boa sorte nos seus palpites. 🍀
-        </p>
-      </div>
 
       <PrizePoolBlock />
 
