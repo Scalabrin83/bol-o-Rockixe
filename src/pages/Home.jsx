@@ -11,6 +11,7 @@ export function Home() {
   const { userData } = useAuth();
   const [teams, setTeams] = useState({});
   const [stats, setStats] = useState({ totalUsers: 0, totalPot: 0 });
+  const [showConfirmedPopup, setShowConfirmedPopup] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,6 +39,16 @@ export function Home() {
 
   const isPending = userData.status === 'pending';
   const championName = teams[userData.championTeamId]?.name || userData.championTeamId;
+
+  useEffect(() => {
+    if (!userData || userData.status !== 'confirmed') return;
+    const storageKey = `bolao-confirmed-popup-${userData.uid}`;
+    const alreadySeen = window.localStorage.getItem(storageKey);
+    if (!alreadySeen) {
+      setShowConfirmedPopup(true);
+      window.localStorage.setItem(storageKey, 'true');
+    }
+  }, [userData]);
 
   const shareMessage = `⚽🏆 *Bolão Copa do Mundo 2026 - Barbearia Rockixe!*\n\nFala, craque! Participe do nosso bolão da Copa do Mundo 2026! Escolha seu campeão, faça seus palpites e concorra a prêmios!\n\n👉 Acesse e cadastre-se: ${APP_URL}\n\n_Vagas limitadas!_ 🔥`;
 
@@ -175,6 +186,26 @@ export function Home() {
           GRUPO DO BOLÃO
         </a>
       </div>
+
+      {showConfirmedPopup && (
+        <div className="card" style={{ borderColor: 'rgba(52,211,153,0.3)', background: 'rgba(52,211,153,0.08)', marginBottom: 20, padding: '18px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--success)', marginBottom: 6 }}>Pagamento confirmado!</div>
+              <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-secondary)', margin: 0 }}>
+                Seu pagamento foi aprovado e sua participação já está liberada.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowConfirmedPopup(false)}
+              style={{ border: 'none', background: 'transparent', color: 'var(--text-secondary)', fontSize: 20, cursor: 'pointer', lineHeight: 1 }}
+              aria-label="Fechar notificação"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="card" style={{ borderColor: 'rgba(52,211,153,0.3)', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
