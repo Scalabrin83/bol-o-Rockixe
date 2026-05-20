@@ -135,16 +135,16 @@ export function Home() {
             Enviar Comprovante
           </a>
         
-            <div style={{ marginTop: 12 }}>
-            <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 8 }}>Acesse o grupo do bolão no whats app</div>
+            <div style={{ marginTop: 12, textAlign: 'center' }}>
+            <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 8, fontWeight: 700 }}>Acesse o grupo do bolão no whats app</div>
             <a
               href={groupLink}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn--secondary"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 700 }}
             >
-              grupo Bolão
+              GRUPO DO BOLÃO
             </a>
           </div>
         </div>
@@ -205,16 +205,16 @@ export function Home() {
           Convidar pelo WhatsApp
         </button>
       )}
-      <div style={{ marginTop: 12 }}>
-        <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 8 }}>Acesse o grupo do bolão no whats app</div>
+      <div style={{ marginTop: 12, textAlign: 'center' }}>
+        <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 8, fontWeight: 700 }}>Acesse o grupo do bolão no whats app</div>
         <a
           href={groupLink}
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn--secondary"
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%' }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 700 }}
         >
-          grupo Bolão
+          GRUPO DO BOLÃO
         </a>
       </div>
     </div>
