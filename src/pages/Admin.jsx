@@ -234,17 +234,19 @@ export function Admin() {
         });
       }
 
+      const isTournamentFinished = !!championId;
+      
       const batch = writeBatch(db);
       for (const u of usersData) {
         let finalPoints = u.basePoints;
         
-        // Bônus de Maior Acertador de Exatos
-        if (maxExactScores > 0 && u.baseExact === maxExactScores) {
+        // Bônus de Maior Acertador de Exatos (SOMENTE NO FINAL DO TORNEIO)
+        if (isTournamentFinished && maxExactScores > 0 && u.baseExact === maxExactScores) {
           finalPoints += 10;
         }
         
         // Bônus de Campeão
-        if (championId && u.championTeamId === championId) {
+        if (isTournamentFinished && u.championTeamId === championId) {
           finalPoints += 10;
         }
 
