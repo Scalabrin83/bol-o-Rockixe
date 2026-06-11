@@ -142,7 +142,8 @@ export function Admin() {
         status: 'finished'
       }, { merge: true });
       
-      alert('Resultado salvo com sucesso! Clique no botão de Recalcular Pontos para atualizar o ranking.');
+      await recalculateAllScores(true); // Chamada automática e silenciosa
+      alert('Resultado salvo e ranking atualizado com sucesso!');
       fetchMatches();
     } catch(e) {
       console.error(e);
@@ -150,7 +151,7 @@ export function Admin() {
     }
   };
 
-  const recalculateAllScores = async () => {
+  const recalculateAllScores = async (isAuto = false) => {
     try {
       const matchesSnap = await getDocs(collection(db, 'matches'));
       const finishedMatches = matchesSnap.docs
@@ -180,7 +181,7 @@ export function Admin() {
           for (const match of finishedMatches) {
             const pred = preds[match.id];
             if (!pred) continue;
-            if (pred.scoreA === '' || pred.scoreB === '') continue; // Ignora palpite em branco
+            if (pred.scoreA === undefined || pred.scoreB === undefined || pred.scoreA === '' || pred.scoreB === '') continue; // Ignora palpite inválido
 
             const offA = parseInt(match.officialScoreA);
             const offB = parseInt(match.officialScoreB);
@@ -254,11 +255,15 @@ export function Admin() {
       }
 
       await batch.commit();
-      alert('Pontuações recalculadas com sucesso! Todos os bônus foram aplicados.');
+      
+      if (!isAuto) {
+        alert('Pontuações recalculadas com sucesso! Todos os bônus foram aplicados.');
+      }
+      
       fetchUsers(); // Atualiza a tela se necessário
     } catch (e) {
       console.error(e);
-      alert('Erro ao recalcular pontuações.');
+      if (!isAuto) alert('Erro ao recalcular pontuações.');
     }
   };
 
@@ -388,7 +393,7 @@ export function Admin() {
         <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h3>Resultados Oficiais</h3>
-            <Button onClick={recalculateAllScores} style={{ background: 'var(--success)', color: '#fff', border: 'none' }}>
+            <Button onClick={() => recalculateAllScores(false)} style={{ background: 'var(--success)', color: '#fff', border: 'none' }}>
               🔄 Recalcular Pontos
             </Button>
           </div>
