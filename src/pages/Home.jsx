@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { Share2 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { isAfter, parseISO } from 'date-fns';
+import { TEAM_FLAGS } from '../utils/flags';
 
 // Troque pela URL real após fazer o deploy na Hostinger
 const APP_URL = 'https://bolao.barbeariarockixe.com.br';
@@ -12,28 +14,111 @@ export function Home() {
   const [teams, setTeams] = useState({});
   const [stats, setStats] = useState({ totalUsers: 0, totalPot: 0 });
   const [showConfirmedPopup, setShowConfirmedPopup] = useState(false);
+  const [activeMatches, setActiveMatches] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMatch, setModalMatch] = useState(null);
+  const [modalPredictions, setModalPredictions] = useState([]);
+  const [loadingPredictions, setLoadingPredictions] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      // Buscar times
-      const teamsSnap = await getDocs(collection(db, 'teams'));
-      const obj = {};
-      teamsSnap.docs.forEach(d => { obj[d.id] = d.data(); });
-      setTeams(obj);
+      try {
+        const [teamsSnap, usersSnap, matchesSnap, roundsSnap] = await Promise.all([
+          getDocs(collection(db, 'teams')),
+          getDocs(collection(db, 'users')),
+          getDocs(collection(db, 'matches')),
+          getDocs(collection(db, 'rounds'))
+        ]);
 
-      // Buscar total de pagantes
-      const usersSnap = await getDocs(collection(db, 'users'));
-      let confirmedCount = 0;
-      usersSnap.docs.forEach(d => {
-        if (d.data().status === 'confirmed') confirmedCount++;
-      });
-      setStats({
-        totalUsers: confirmedCount,
-        totalPot: confirmedCount * 50
-      });
+        const obj = {};
+        teamsSnap.docs.forEach(d => { obj[d.id] = d.data(); });
+        setTeams(obj);
+
+        const usersList = usersSnap.docs.map(d => ({ uid: d.id, ...d.data() }));
+        let confirmedCount = 0;
+        usersList.forEach(u => {
+          if (u.status === 'confirmed') confirmedCount++;
+        });
+        setStats({
+          totalUsers: confirmedCount,
+          totalPot: confirmedCount * 50
+        });
+
+        const matchesData = matchesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const roundsData = roundsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        const locked = matchesData.filter(m => {
+          const isLockedByTime = isAfter(new Date(), parseISO(m.kickoffLocal));
+          const round = roundsData.find(r => r.id === m.roundId);
+          const isLockedByRound = round?.predictionStatus === 'locked';
+          return isLockedByTime || isLockedByRound;
+        });
+
+        if (locked.length > 0) {
+          const maxKickoff = Math.max(...locked.map(m => new Date(m.kickoffLocal).getTime()));
+          const active = locked.filter(m => new Date(m.kickoffLocal).getTime() === maxKickoff);
+          setActiveMatches(active);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar dados na Home", error);
+      }
     };
     fetchData();
   }, []);
+
+  const handleOpenPredictions = async (match) => {
+    setModalMatch(match);
+    setShowModal(true);
+    setLoadingPredictions(true);
+    
+    try {
+      const [usersSnap, predictionsSnap] = await Promise.all([
+        getDocs(collection(db, 'users')),
+        getDocs(collection(db, 'predictions'))
+      ]);
+      
+      const confirmedUsers = usersSnap.docs
+        .map(d => ({ uid: d.id, ...d.data() }))
+        .filter(u => u.status === 'confirmed' && (!u.isAdmin || u.championTeamId));
+        
+      const allPreds = {};
+      predictionsSnap.docs.forEach(d => {
+        allPreds[d.id] = d.data().matches || {};
+      });
+      
+      const mapped = confirmedUsers.map(user => {
+        const userPred = allPreds[user.uid]?.[match.id];
+        const hasPrediction = userPred !== undefined && userPred.scoreA !== undefined && userPred.scoreB !== undefined;
+        
+        let penaltyWinnerName = null;
+        if (hasPrediction && userPred.penaltyWinnerId) {
+          penaltyWinnerName = teams[userPred.penaltyWinnerId]?.name || userPred.penaltyWinnerId;
+        }
+        
+        return {
+          userName: user.name,
+          scoreA: userPred?.scoreA,
+          scoreB: userPred?.scoreB,
+          penaltyWinnerName,
+          hasPrediction
+        };
+      });
+      
+      mapped.sort((a, b) => {
+        if (a.hasPrediction !== b.hasPrediction) {
+          return b.hasPrediction - a.hasPrediction;
+        }
+        return a.userName.localeCompare(b.userName);
+      });
+      
+      setModalPredictions(mapped);
+    } catch (error) {
+      console.error("Erro ao buscar palpites", error);
+      alert("Erro ao buscar palpites.");
+    } finally {
+      setLoadingPredictions(false);
+    }
+  };
 
   if (!userData) return null;
 
@@ -221,6 +306,48 @@ export function Home() {
         </div>
       </div>
 
+      {/* CARD PALPITES EM TEMPO REAL */}
+      {activeMatches.length > 0 && (
+        <div className="card" style={{ borderColor: 'var(--border-glow)', boxShadow: 'var(--shadow-glow)', marginBottom: 20, padding: '16px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <span style={{ fontSize: '16px' }}>⚽</span>
+            <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
+              Palpites em Tempo Real
+            </span>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {activeMatches.map(match => {
+              const teamA = teams[match.teamAId];
+              const teamB = teams[match.teamBId];
+              return (
+                <div key={match.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingRight: '8px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '15px' }}>{TEAM_FLAGS[match.teamAId] || '🏳️'}</span>
+                      <span>{teamA?.name || '—'}</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '11px', fontWeight: 500 }}>vs</span>
+                      <span style={{ fontSize: '15px' }}>{TEAM_FLAGS[match.teamBId] || '🏳️'}</span>
+                      <span>{teamB?.name || '—'}</span>
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      {match.status === 'finished' ? '🏁 Finalizado' : '⏱️ Fechado / Em andamento'}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleOpenPredictions(match)}
+                    className="btn btn--primary"
+                    style={{ width: 'auto', padding: '8px 14px', fontSize: '12px', borderRadius: '8px', flexShrink: 0 }}
+                  >
+                    Ver Palpites
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {userData.championTeamId && (
         <div className="card card--gold" style={{ textAlign: 'center', marginBottom: 20 }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 8 }}>
@@ -243,6 +370,74 @@ export function Home() {
           <Share2 size={18} />
           Convidar pelo WhatsApp
         </button>
+      )}
+
+      {/* MODAL DE PALPITES EM TEMPO REAL */}
+      {showModal && modalMatch && (
+        <div className="modal-overlay">
+          <div className="modal-header">
+            <h3 className="modal-title">Palpites da Galera</h3>
+            <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
+          </div>
+          
+          <div className="modal-body">
+            <div style={{ textAlign: 'center', marginBottom: '20px', padding: '15px', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
+                Jogo Ativo
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '15px', fontWeight: 800 }}>
+                <span>{TEAM_FLAGS[modalMatch.teamAId] || '🏳️'}</span>
+                <span>{teams[modalMatch.teamAId]?.name}</span>
+                <span style={{ color: 'var(--primary)', fontSize: '12px' }}>VS</span>
+                <span>{teams[modalMatch.teamBId]?.name}</span>
+                <span>{TEAM_FLAGS[modalMatch.teamBId] || '🏳️'}</span>
+              </div>
+              {modalMatch.status === 'finished' && (
+                <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--success)', fontWeight: 600 }}>
+                  Placar Oficial: {modalMatch.officialScoreA} × {modalMatch.officialScoreB}
+                  {modalMatch.officialPenaltyWinnerId && ` (Pênaltis: ${teams[modalMatch.officialPenaltyWinnerId]?.name})`}
+                </div>
+              )}
+            </div>
+
+            {loadingPredictions ? (
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                Carregando palpites...
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {modalPredictions.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
+                    Nenhum participante confirmado encontrado.
+                  </div>
+                ) : (
+                  modalPredictions.map((pred, i) => (
+                    <div key={i} className="prediction-row">
+                      <div className="prediction-row__user">
+                        <span>{pred.userName}</span>
+                        {pred.penaltyWinnerName && (
+                          <span className="prediction-row__penalty-info">
+                            🏆 Classifica: {pred.penaltyWinnerName}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {pred.hasPrediction ? (
+                        <div className="prediction-row__score">
+                          {pred.scoreA} × {pred.scoreB}
+                        </div>
+                      ) : (
+                        <div className="prediction-row__no-pred">
+                          Sem palpite ❌
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
