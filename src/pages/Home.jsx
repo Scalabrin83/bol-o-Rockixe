@@ -47,16 +47,14 @@ export function Home() {
         const matchesData = matchesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
         const roundsData = roundsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        const locked = matchesData.filter(m => {
-          const isLockedByTime = isAfter(new Date(), parseISO(m.kickoffLocal));
-          const round = roundsData.find(r => r.id === m.roundId);
-          const isLockedByRound = round?.predictionStatus === 'locked';
-          return isLockedByTime || isLockedByRound;
+        const started = matchesData.filter(m => {
+          // Apenas partidas que de fato já começaram (kickoff no passado) e com times definidos
+          return m.teamAId && m.teamBId && isAfter(new Date(), parseISO(m.kickoffLocal));
         });
 
-        if (locked.length > 0) {
-          const maxKickoff = Math.max(...locked.map(m => new Date(m.kickoffLocal).getTime()));
-          const active = locked.filter(m => new Date(m.kickoffLocal).getTime() === maxKickoff);
+        if (started.length > 0) {
+          const maxKickoff = Math.max(...started.map(m => new Date(m.kickoffLocal).getTime()));
+          const active = started.filter(m => new Date(m.kickoffLocal).getTime() === maxKickoff);
           setActiveMatches(active);
         }
       } catch (error) {
