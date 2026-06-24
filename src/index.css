@@ -806,10 +806,16 @@ select.input-group__field {
 }
 
 /* ===== GROUP TABLE ===== */
+.group-table-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
 .group-table__header {
   display: flex;
   align-items: center;
-  padding: 10px 16px;
+  min-width: 480px;
+  padding: 10px 0;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-color);
   font-size: 10px;
@@ -821,23 +827,33 @@ select.input-group__field {
 .group-table__row {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
+  min-width: 480px;
+  padding: 12px 0;
   border-bottom: 1px solid var(--border-color);
+  background: var(--bg-card);
   transition: background 0.2s;
 }
 .group-table__row:last-of-type { border-bottom: none; }
-.group-table__row--qualified {
+.group-table__row--qualified .group-table__team-col {
   border-left: 3px solid var(--success);
+  padding-left: 13px;
 }
-.group-table__row--third {
+.group-table__row--third .group-table__team-col {
   border-left: 3px solid var(--warning);
+  padding-left: 13px;
 }
 .group-table__team-col {
-  flex: 1;
+  position: sticky;
+  left: 0;
+  background: inherit;
+  z-index: 2;
+  padding-left: 16px;
+  padding-right: 8px;
+  flex: 1 0 140px;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 0;
 }
 .group-table__pos {
   width: 20px;
@@ -861,7 +877,7 @@ select.input-group__field {
   text-overflow: ellipsis;
 }
 .group-table__stat {
-  width: 28px;
+  width: 32px;
   text-align: center;
   font-size: 12px;
   font-weight: 500;
@@ -869,9 +885,17 @@ select.input-group__field {
   flex-shrink: 0;
 }
 .group-table__stat--pts {
+  position: sticky;
+  right: 0;
+  background: inherit;
+  z-index: 2;
+  padding-right: 16px;
+  padding-left: 8px;
   font-weight: 800;
   color: var(--primary);
   font-size: 14px;
+  width: 44px;
+  flex-shrink: 0;
 }
 
 /* ===== MODAL PALPITES EM TEMPO REAL ===== */

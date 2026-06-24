@@ -99,46 +99,48 @@ export function Classificacao() {
           </span>
         </div>
 
-        {/* Header */}
-        <div className="group-table__header">
-          <div className="group-table__team-col">Seleção</div>
-          <div className="group-table__stat">P</div>
-          <div className="group-table__stat">V</div>
-          <div className="group-table__stat">E</div>
-          <div className="group-table__stat">D</div>
-          <div className="group-table__stat">GP</div>
-          <div className="group-table__stat">GC</div>
-          <div className="group-table__stat">SG</div>
-          <div className="group-table__stat group-table__stat--pts">Pts</div>
-        </div>
-
-        {/* Rows */}
-        {standings.map((s, i) => {
-          const isQualified = i < 2;
-          const isThird = i === 2;
-          return (
-            <div key={s.id} className={`group-table__row ${isQualified ? 'group-table__row--qualified' : ''} ${isThird ? 'group-table__row--third' : ''}`}>
-              <div className="group-table__team-col">
-                <span className="group-table__pos">{i + 1}</span>
-                <span className="group-table__name">{teams[s.id]?.name || s.id}</span>
-              </div>
-              <div className="group-table__stat">{s.p}</div>
-              <div className="group-table__stat">{s.w}</div>
-              <div className="group-table__stat">{s.d}</div>
-              <div className="group-table__stat">{s.l}</div>
-              <div className="group-table__stat">{s.gf}</div>
-              <div className="group-table__stat">{s.ga}</div>
-              <div className="group-table__stat">{s.gf - s.ga}</div>
-              <div className="group-table__stat group-table__stat--pts">{s.pts}</div>
-            </div>
-          );
-        })}
-
-        {standings.length === 0 && (
-          <div style={{ padding: 30, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-            Nenhum time cadastrado neste grupo.
+        <div className="group-table-scroll-wrapper">
+          {/* Header */}
+          <div className="group-table__header">
+            <div className="group-table__team-col">Seleção</div>
+            <div className="group-table__stat">P</div>
+            <div className="group-table__stat">V</div>
+            <div className="group-table__stat">E</div>
+            <div className="group-table__stat">D</div>
+            <div className="group-table__stat">GP</div>
+            <div className="group-table__stat">GC</div>
+            <div className="group-table__stat">SG</div>
+            <div className="group-table__stat group-table__stat--pts">Pts</div>
           </div>
-        )}
+
+          {/* Rows */}
+          {standings.map((s, i) => {
+            const isQualified = i < 2;
+            const isThird = i === 2;
+            return (
+              <div key={s.id} className={`group-table__row ${isQualified ? 'group-table__row--qualified' : ''} ${isThird ? 'group-table__row--third' : ''}`}>
+                <div className="group-table__team-col">
+                  <span className="group-table__pos">{i + 1}</span>
+                  <span className="group-table__name">{teams[s.id]?.name || s.id}</span>
+                </div>
+                <div className="group-table__stat">{s.p}</div>
+                <div className="group-table__stat">{s.w}</div>
+                <div className="group-table__stat">{s.d}</div>
+                <div className="group-table__stat">{s.l}</div>
+                <div className="group-table__stat">{s.gf}</div>
+                <div className="group-table__stat">{s.ga}</div>
+                <div className="group-table__stat">{s.gf - s.ga}</div>
+                <div className="group-table__stat group-table__stat--pts">{s.pts}</div>
+              </div>
+            );
+          })}
+
+          {standings.length === 0 && (
+            <div style={{ padding: 30, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+              Nenhum time cadastrado neste grupo.
+            </div>
+          )}
+        </div>
 
         {/* Legend */}
         <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-color)', display: 'flex', gap: 16, fontSize: 11, color: 'var(--text-muted)' }}>
