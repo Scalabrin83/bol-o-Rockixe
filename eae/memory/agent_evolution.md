@@ -9,7 +9,7 @@
 |--------|--------|----------------|------|
 | diretor_executivo | 1.0 | inicial | — |
 | radar_mercado | 1.0 | inicial | — |
-| engenharia_agentica | 1.1 | regra "MVP de página única autossuficiente (CSS/JS inline)" | 2026-06-20 |
+| engenharia_agentica | 1.2 | regras de tratamento de fuso horário e filtragem de partidas ativas | 2026-06-24 |
 | designer_ux | 1.2 | regra "refino visual é baseline, não formulário cru" | 2026-06-20 |
 | auditor_acessibilidade | 1.0 | inicial (base wshobson) | — |
 | guardiao_regressao | 1.0 | inicial | — |
@@ -44,3 +44,12 @@
 - **Patch:** Regra nova: MVP de página única é entregue autossuficiente (CSS/JS críticos inline), validado tanto servido quanto via `file://`.
 - **Tipo:** Clareza/checklist (auto-aplicável).
 - **Resultado esperado:** MVPs aparecem estilizados em qualquer visualizador, eliminando o falso "está feio".
+
+### engenharia_agentica v1.1 → v1.2 — 2026-06-24
+- **Ciclo/MVP:** Documentação EAE e melhoria de feedback de pontos e destaque no ranking.
+- **Sinal:** Usuário relatou problema com partida ativa não sendo selecionada corretamente (puxou partida futura vazia) e riscos de confusão entre horários de Copa 1h AM/13h PM.
+- **Diagnóstico:** A lógica de filtragem da partida atual não exigia times definidos, e a manipulação de fusos/horários de kickoff de campeonatos globais exige checagens rigorosas e formatos explícitos para evitar confusões de fuso horário.
+- **Patch:** Regras novas sobre tratamento rigoroso de datas/fusos horários e validação completa de times definidos (`teamAId` e `teamBId`) na filtragem de partidas ativas.
+- **Tipo:** Clareza/checklist (auto-aplicável).
+- **Resultado esperado:** Filtros de partidas ativas e exibição de horários mais robustos e livres de regressões de fuso horário.
+
