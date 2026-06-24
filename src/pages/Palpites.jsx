@@ -6,6 +6,98 @@ import { Button } from '../components/ui/Button';
 import { isAfter, parseISO } from 'date-fns';
 import { TEAM_FLAGS } from '../utils/flags';
 
+const calculateMatchPoints = (match, pred) => {
+  if (pred.scoreA === undefined || pred.scoreB === undefined || pred.scoreA === '' || pred.scoreB === '') {
+    return {
+      points: 0,
+      description: "Sem palpite (0 pts)",
+      colorBg: "rgba(239, 68, 68, 0.1)",
+      colorText: "#EF4444",
+      colorBorder: "rgba(239, 68, 68, 0.2)"
+    };
+  }
+
+  const offA = parseInt(match.officialScoreA, 10);
+  const offB = parseInt(match.officialScoreB, 10);
+  const predA = parseInt(pred.scoreA, 10);
+  const predB = parseInt(pred.scoreB, 10);
+
+  const isKnockout = !match.groupId;
+  let points = 0;
+  let isExact = false;
+  let isOutcomeCorrect = false;
+
+  // Check exact score
+  if (predA === offA && predB === offB) {
+    points += 6;
+    isExact = true;
+  } else {
+    // Check outcome (winner or draw)
+    const offOutcome = offA > offB ? 'A' : offA < offB ? 'B' : 'DRAW';
+    const predOutcome = predA > predB ? 'A' : predA < predB ? 'B' : 'DRAW';
+    if (offOutcome === predOutcome) {
+      points += 3;
+      isOutcomeCorrect = true;
+    }
+  }
+
+  // Knockout penalty winner check
+  let isQualifierCorrect = false;
+  if (isKnockout) {
+    let offQualifier = null;
+    let predQualifier = null;
+
+    if (offA > offB) offQualifier = match.teamAId;
+    else if (offB > offA) offQualifier = match.teamBId;
+    else offQualifier = match.officialPenaltyWinnerId;
+
+    if (predA > predB) predQualifier = match.teamAId;
+    else if (predB > predA) predQualifier = match.teamBId;
+    else predQualifier = pred.penaltyWinnerId;
+
+    if (offQualifier && predQualifier === offQualifier) {
+      points += 3;
+      isQualifierCorrect = true;
+    }
+  }
+
+  // Generate description and colors
+  let desc = "";
+  let bg = "rgba(107, 107, 128, 0.1)";
+  let text = "var(--text-secondary)";
+  let border = "var(--border-color)";
+
+  if (isExact) {
+    desc = isQualifierCorrect ? `🔥 Placar Exato + Classificado (+9 pts)` : `🔥 Placar Exato (+6 pts)`;
+    bg = "rgba(52, 211, 153, 0.1)";
+    text = "var(--success)";
+    border = "rgba(52, 211, 153, 0.25)";
+  } else if (isOutcomeCorrect) {
+    desc = isQualifierCorrect ? `👍 Vencedor + Classificado (+6 pts)` : `👍 Acertou Vencedor (+3 pts)`;
+    bg = "rgba(212, 168, 67, 0.1)";
+    text = "var(--primary)";
+    border = "rgba(212, 168, 67, 0.25)";
+  } else if (isQualifierCorrect) {
+    desc = `⚽ Apenas Classificado (+3 pts)`;
+    bg = "rgba(251, 191, 36, 0.1)";
+    text = "var(--warning)";
+    border = "rgba(251, 191, 36, 0.25)";
+  } else {
+    desc = `❌ Errou (0 pts)`;
+    bg = "rgba(107, 107, 128, 0.1)";
+    text = "var(--text-muted)";
+    border = "rgba(107, 107, 128, 0.15)";
+  }
+
+  return {
+    points,
+    description: desc,
+    colorBg: bg,
+    colorText: text,
+    colorBorder: border
+  };
+};
+
 export function Palpites() {
   const { userData, currentUser } = useAuth();
   const [rounds, setRounds] = useState([]);
@@ -255,11 +347,39 @@ export function Palpites() {
                   Salvar Palpite
                 </Button>
               )}
-              {isLocked && hasSaved && (
+              {isLocked && match.status !== 'finished' && hasSaved && (
                 <span className="match-card__badge match-card__badge--saved">✓ Palpite salvo</span>
               )}
-              {isLocked && !hasSaved && (
+              {isLocked && match.status !== 'finished' && !hasSaved && (
                 <span className="match-card__badge match-card__badge--locked">🔒 Bloqueado</span>
+              )}
+              {isLocked && match.status === 'finished' && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    Resultado Oficial: <strong style={{ color: '#fff' }}>{match.officialScoreA} × {match.officialScoreB}</strong>
+                    {match.officialPenaltyWinnerId && ` (Pênaltis: ${teams[match.officialPenaltyWinnerId]?.name || match.officialPenaltyWinnerId})`}
+                  </div>
+                  {(() => {
+                    const result = calculateMatchPoints(match, pred);
+                    return (
+                      <span 
+                        style={{ 
+                          background: result.colorBg, 
+                          color: result.colorText, 
+                          borderColor: result.colorBorder,
+                          border: '1px solid',
+                          display: 'inline-block',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          fontWeight: 700,
+                          fontSize: '11px'
+                        }}
+                      >
+                        {result.description}
+                      </span>
+                    );
+                  })()}
+                </div>
               )}
             </div>
           </div>

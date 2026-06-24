@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useAuth } from '../contexts/AuthContext';
 
 export function Ranking() {
+  const { currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [teams, setTeams] = useState({});
   const [loading, setLoading] = useState(true);
@@ -79,7 +81,7 @@ export function Ranking() {
         )}
 
         {sortedUsers.map((u, i) => (
-          <div key={u.uid} className={`ranking-item ${i < 3 ? 'ranking-item--top' : ''}`}>
+          <div key={u.uid} className={`ranking-item ${i < 3 ? 'ranking-item--top' : ''} ${currentUser && u.uid === currentUser.uid ? 'ranking-item--current' : ''}`}>
             <div className={`ranking-item__pos ${getPosClass(i)}`}>
               {i + 1}
             </div>

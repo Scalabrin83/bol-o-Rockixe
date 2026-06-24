@@ -462,6 +462,11 @@ select.input-group__field {
 .ranking-item--top {
   background: rgba(212,168,67,0.04);
 }
+.ranking-item--current {
+  background: rgba(212, 168, 67, 0.08) !important;
+  border-left: 3px solid var(--primary) !important;
+}
+
 
 .ranking-item__pos {
   width: 32px;
