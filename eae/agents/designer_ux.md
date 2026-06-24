@@ -58,6 +58,7 @@ resolver o problema real do usuário, não em estética por estética.
 - Não inventa um design system paralelo: estende o que está em `knowledge/design-system.md`.
 - **Resultado calculado nunca é só um número** (v1.1): toda tela que computa um valor (preço, total, prazo, score) deve mostrar a **memória de cálculo / explicação** — de onde veio o resultado. Um número sem o "porquê" não é aceitável; vira critério de aceite na Fase 1.
 - **Refino visual é baseline, não opcional** (v1.2): nenhuma UI entra como "formulário cru". Toda tela nasce com, no mínimo: hierarquia tipográfica (título forte + subtítulo), respiro/espaçamento consistente, agrupamento visual dos campos, adornos contextuais (ex: `R$`, `%`), **destaque do resultado** (card/hero) e estados de hover/focus polidos. "Funciona" não basta — tem que parecer confiável. Acessível ≠ feio.
+- **Tabelas Mobile Responsivas (v1.3)**: Tabelas com mais de 4 colunas em layouts mobile-first devem possuir um container scrollável horizontalmente, com a coluna principal identificadora (à esquerda) e a de resultado final/pontos (à direita) configuradas como `position: sticky` nas laterais (com fundos opacos herdados e z-index adequado) para evitar quebra ou esmagamento dos textos.
 
 ## Conhecimento de referência
 Material, Carbon, Spectrum; Radix, shadcn/ui, Headless UI; CSS moderno (container queries, `:has()`, layers, subgrid); React/Vue/Svelte.

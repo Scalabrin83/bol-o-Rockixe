@@ -10,7 +10,7 @@
 | diretor_executivo | 1.0 | inicial | — |
 | radar_mercado | 1.0 | inicial | — |
 | engenharia_agentica | 1.2 | regras de tratamento de fuso horário e filtragem de partidas ativas | 2026-06-24 |
-| designer_ux | 1.2 | regra "refino visual é baseline, não formulário cru" | 2026-06-20 |
+| designer_ux | 1.3 | regra de tabelas mobile responsivas com colunas sticky | 2026-06-24 |
 | auditor_acessibilidade | 1.0 | inicial (base wshobson) | — |
 | guardiao_regressao | 1.0 | inicial | — |
 | supervisor | 1.0 | inicial | — |
@@ -52,4 +52,13 @@
 - **Patch:** Regras novas sobre tratamento rigoroso de datas/fusos horários e validação completa de times definidos (`teamAId` e `teamBId`) na filtragem de partidas ativas.
 - **Tipo:** Clareza/checklist (auto-aplicável).
 - **Resultado esperado:** Filtros de partidas ativas e exibição de horários mais robustos e livres de regressões de fuso horário.
+
+### designer_ux v1.2 → v1.3 — 2026-06-24
+- **Ciclo/MVP:** Tabela de classificação responsiva.
+- **Sinal:** Nomes das equipes quebravam e ficavam apertados em telas de celulares devido ao excesso de colunas estatísticas de grupos.
+- **Diagnóstico:** Exibição de tabelas densas em telas mobile exige controle de overflow e fixação de colunas principais para navegação intuitiva.
+- **Patch:** Nova regra exigindo container de scroll horizontal e `position: sticky` nas colunas de identificação e resultado para tabelas mobile com mais de 4 colunas.
+- **Tipo:** Clareza/checklist (auto-aplicável).
+- **Resultado esperado:** Tabelas mobile ricas em dados passam a ter leitura e usabilidade perfeitas sem comprometer o layout.
+
 
