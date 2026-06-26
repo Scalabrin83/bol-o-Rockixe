@@ -167,13 +167,19 @@ export function Palpites() {
     try {
       const predRef = doc(db, 'predictions', currentUser.uid);
       const docSnap = await getDoc(predRef);
+      const scoreAVal = parseInt(pred.scoreA, 10);
+      const scoreBVal = parseInt(pred.scoreB, 10);
+      const predictionData = {
+        scoreA: scoreAVal,
+        scoreB: scoreBVal,
+        updatedAt: new Date().toISOString()
+      };
+      if (scoreAVal === scoreBVal && pred.penaltyWinnerId) {
+        predictionData.penaltyWinnerId = pred.penaltyWinnerId;
+      }
       const newData = {
         ...((docSnap.exists() ? docSnap.data().matches : {}) || {}),
-        [match.id]: {
-          scoreA: parseInt(pred.scoreA, 10),
-          scoreB: parseInt(pred.scoreB, 10),
-          updatedAt: new Date().toISOString()
-        }
+        [match.id]: predictionData
       };
       await setDoc(predRef, { matches: newData }, { merge: true });
       alert("Palpite salvo! ✓");

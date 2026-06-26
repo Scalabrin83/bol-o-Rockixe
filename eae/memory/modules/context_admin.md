@@ -9,9 +9,10 @@
 - **Faz:**
   - Habilita e gerencia abas de controle administrativo: Usuários, Times, Jogos, Rodadas.
   - Permite alterar o status de pagamento de um usuário (pending -> confirmed) ou excluir participantes.
-  - Permite atualizar os times que disputarão as partidas de mata-mata à medida que as seleções se classificarem.
+  - **Mata-Mata Automático:** Permite gerar automaticamente todos os confrontos do mata-mata (iniciando em 32-avos de final) a partir dos resultados da fase de grupos, selecionando os top 2 e os 8 melhores 3ºs colocados (usando busca backtracking para alocação sem conflito de grupos) e propagando em cascata as rodadas subsequentes de jogos finalizados.
+  - **Override Manual:** Permite habilitar dropdowns para alteração manual de confrontos a qualquer momento (mesmo se já definidos) para corrigir distorções.
   - Permite trancar ou liberar rodadas inteiras para novos palpites.
-  - Permite digitar o placar oficial de um jogo e salva-lo.
+  - Permite digitar o placar oficial de um jogo e salvá-lo.
   - **Recálculo Automático:** Ao salvar um resultado oficial, dispara a rotina idempotente `recalculateAllScores` que recalcula os pontos de todos os usuários do bolão a partir de todos os jogos finalizados, aplicando bônus e atualizando o ranking.
 - **NÃO faz:**
   - Não altera palpites inseridos por participantes (apenas lê para cálculo de pontuação).
