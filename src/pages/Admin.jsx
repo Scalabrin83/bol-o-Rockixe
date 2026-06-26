@@ -136,6 +136,26 @@ export function Admin() {
   const handleAutoResolveKnockouts = async () => {
     if (!window.confirm("Deseja gerar/atualizar automaticamente todos os confrontos do mata-mata com base nos resultados dos grupos? (Mudanças manuais não salvas serão sobrescritas)")) return;
     
+    // Mapeamento oficial da FIFA 2026 de horários (Brasília -03:00), estádios e cidades para os 16-avos
+    const roundOf32Updates = {
+      m073: { stadium: 'SoFi Stadium', city: 'Los Angeles', kickoffLocal: '2026-06-28T16:00:00-03:00', roundName: '16-avos' },
+      m074: { stadium: 'Gillette Stadium', city: 'Boston', kickoffLocal: '2026-06-29T17:30:00-03:00', roundName: '16-avos' },
+      m075: { stadium: 'Estadio Monterrey', city: 'Monterrey', kickoffLocal: '2026-06-29T22:00:00-03:00', roundName: '16-avos' },
+      m076: { stadium: 'NRG Stadium', city: 'Houston', kickoffLocal: '2026-06-29T14:00:00-03:00', roundName: '16-avos' },
+      m077: { stadium: 'MetLife Stadium', city: 'Nova York/Nova Jersey', kickoffLocal: '2026-06-30T18:00:00-03:00', roundName: '16-avos' },
+      m078: { stadium: 'AT&T Stadium', city: 'Dallas', kickoffLocal: '2026-06-30T14:00:00-03:00', roundName: '16-avos' },
+      m079: { stadium: 'Estadio Azteca', city: 'Cidade do México', kickoffLocal: '2026-06-30T22:00:00-03:00', roundName: '16-avos' },
+      m080: { stadium: 'Mercedes-Benz Stadium', city: 'Atlanta', kickoffLocal: '2026-07-01T13:00:00-03:00', roundName: '16-avos' },
+      m081: { stadium: 'Levi\'s Stadium', city: 'San Francisco', kickoffLocal: '2026-07-01T21:00:00-03:00', roundName: '16-avos' },
+      m082: { stadium: 'Lumen Field', city: 'Seattle', kickoffLocal: '2026-07-01T17:00:00-03:00', roundName: '16-avos' },
+      m083: { stadium: 'BMO Field', city: 'Toronto', kickoffLocal: '2026-07-02T20:00:00-03:00', roundName: '16-avos' },
+      m084: { stadium: 'SoFi Stadium', city: 'Los Angeles', kickoffLocal: '2026-07-02T16:00:00-03:00', roundName: '16-avos' },
+      m085: { stadium: 'BC Place', city: 'Vancouver', kickoffLocal: '2026-07-03T00:00:00-03:00', roundName: '16-avos' },
+      m086: { stadium: 'Hard Rock Stadium', city: 'Miami', kickoffLocal: '2026-07-03T19:00:00-03:00', roundName: '16-avos' },
+      m087: { stadium: 'Arrowhead Stadium', city: 'Kansas City', kickoffLocal: '2026-07-03T22:30:00-03:00', roundName: '16-avos' },
+      m088: { stadium: 'AT&T Stadium', city: 'Dallas', kickoffLocal: '2026-07-03T20:00:00-03:00', roundName: '16-avos' }
+    };
+
     const GROUP_IDS = ['group_a','group_b','group_c','group_d','group_e','group_f','group_g','group_h','group_i','group_j','group_k','group_l'];
     
     // 1. Calcular a classificação local para cada um dos 12 grupos
@@ -250,7 +270,7 @@ export function Admin() {
       }
     }
 
-    // 5. Mapear o chaveamento completo da rodada de 32-avos
+    // 5. Mapear o chaveamento completo da rodada de 32-avos (agora 16-avos)
     const r32Mappings = {
       m073: { teamA: secondPlaces['group_a'], teamB: secondPlaces['group_b'] },
       m074: { teamA: firstPlaces['group_e'], teamB: thirdsAssignment['m074'] },
@@ -272,7 +292,7 @@ export function Admin() {
 
     const updatedMatches = matches.map(m => ({ ...m }));
     
-    // 6. Atualizar a rodada de 32-avos no array local
+    // 6. Atualizar a rodada de 16-avos no array local
     for (const m of updatedMatches) {
       if (m.roundId === 'round_32') {
         const mapping = r32Mappings[m.id];
@@ -379,30 +399,52 @@ export function Admin() {
       }
     }
 
-    // 9. Gravar as mudanças em batch no Firestore
+    // 9. Gravar as mudanças em batch no Firestore (incluindo renomeação da rodada e correção de horários/estádios)
     try {
       const batch = writeBatch(db);
+      
+      // Atualiza o nome da rodada de 32-avos para 16-avos de Final
+      batch.update(doc(db, 'rounds', 'round_32'), {
+        name: '16-avos de Final'
+      });
+
       let count = 0;
       for (const m of updatedMatches) {
         const original = matches.find(x => x.id === m.id);
-        if (original && (original.teamAId !== m.teamAId || original.teamBId !== m.teamBId)) {
-          batch.update(doc(db, 'matches', m.id), {
-            teamAId: m.teamAId || null,
-            teamBId: m.teamBId || null
-          });
-          count++;
+        if (original) {
+          const r32Upd = roundOf32Updates[m.id];
+          const hasTeamChange = original.teamAId !== m.teamAId || original.teamBId !== m.teamBId;
+          const hasMetadataChange = r32Upd && (
+            original.stadium !== r32Upd.stadium ||
+            original.city !== r32Upd.city ||
+            original.kickoffLocal !== r32Upd.kickoffLocal ||
+            original.roundName !== r32Upd.roundName
+          );
+
+          if (hasTeamChange || hasMetadataChange) {
+            const updatePayload = {
+              teamAId: m.teamAId || null,
+              teamBId: m.teamBId || null
+            };
+            if (r32Upd) {
+              updatePayload.stadium = r32Upd.stadium;
+              updatePayload.city = r32Upd.city;
+              updatePayload.kickoffLocal = r32Upd.kickoffLocal;
+              updatePayload.roundName = r32Upd.roundName;
+            }
+            batch.update(doc(db, 'matches', m.id), updatePayload);
+            count++;
+          }
         }
       }
-      if (count > 0) {
-        await batch.commit();
-        alert(`${count} confrontos do mata-mata atualizados automaticamente no Firestore! ✓`);
-        fetchMatches();
-      } else {
-        alert("Todos os confrontos já estão perfeitamente atualizados com base nos grupos.");
-      }
+      
+      await batch.commit();
+      alert(`Mata-mata atualizado com sucesso! A rodada foi renomeada para "16-avos de Final" e ${count} partidas foram corrigidas com horários oficiais, estádios e equipes correspondentes. ✓`);
+      fetchRounds();
+      fetchMatches();
     } catch (err) {
       console.error(err);
-      alert("Erro ao salvar confrontos automatizados no Firestore.");
+      alert("Erro ao salvar confrontos e metadados no Firestore.");
     }
   };
 
