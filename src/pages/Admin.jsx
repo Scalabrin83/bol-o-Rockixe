@@ -136,25 +136,71 @@ export function Admin() {
   const handleAutoResolveKnockouts = async () => {
     if (!window.confirm("Deseja gerar/atualizar automaticamente todos os confrontos do mata-mata com base nos resultados dos grupos? (Mudanças manuais não salvas serão sobrescritas)")) return;
     
-    // Mapeamento oficial da FIFA 2026 de horários (Brasília -03:00), estádios e cidades para os 16-avos
+    // ============================================================
+    // METADADOS OFICIAIS FIFA 2026 — Horários em Brasília (BRT -03:00)
+    // ============================================================
+
+    // 16-avos de Final (m073–m088): 28 Jun – 3 Jul
     const roundOf32Updates = {
-      m073: { stadium: 'SoFi Stadium', city: 'Los Angeles', kickoffLocal: '2026-06-28T16:00:00-03:00', roundName: '16-avos' },
-      m074: { stadium: 'Gillette Stadium', city: 'Boston', kickoffLocal: '2026-06-29T17:30:00-03:00', roundName: '16-avos' },
-      m075: { stadium: 'Estadio Monterrey', city: 'Monterrey', kickoffLocal: '2026-06-29T22:00:00-03:00', roundName: '16-avos' },
-      m076: { stadium: 'NRG Stadium', city: 'Houston', kickoffLocal: '2026-06-29T14:00:00-03:00', roundName: '16-avos' },
-      m077: { stadium: 'MetLife Stadium', city: 'Nova York/Nova Jersey', kickoffLocal: '2026-06-30T18:00:00-03:00', roundName: '16-avos' },
-      m078: { stadium: 'AT&T Stadium', city: 'Dallas', kickoffLocal: '2026-06-30T14:00:00-03:00', roundName: '16-avos' },
-      m079: { stadium: 'Estadio Azteca', city: 'Cidade do México', kickoffLocal: '2026-06-30T22:00:00-03:00', roundName: '16-avos' },
-      m080: { stadium: 'Mercedes-Benz Stadium', city: 'Atlanta', kickoffLocal: '2026-07-01T13:00:00-03:00', roundName: '16-avos' },
-      m081: { stadium: 'Levi\'s Stadium', city: 'San Francisco', kickoffLocal: '2026-07-01T21:00:00-03:00', roundName: '16-avos' },
-      m082: { stadium: 'Lumen Field', city: 'Seattle', kickoffLocal: '2026-07-01T17:00:00-03:00', roundName: '16-avos' },
-      m083: { stadium: 'BMO Field', city: 'Toronto', kickoffLocal: '2026-07-02T20:00:00-03:00', roundName: '16-avos' },
-      m084: { stadium: 'SoFi Stadium', city: 'Los Angeles', kickoffLocal: '2026-07-02T16:00:00-03:00', roundName: '16-avos' },
-      m085: { stadium: 'BC Place', city: 'Vancouver', kickoffLocal: '2026-07-03T00:00:00-03:00', roundName: '16-avos' },
-      m086: { stadium: 'Hard Rock Stadium', city: 'Miami', kickoffLocal: '2026-07-03T19:00:00-03:00', roundName: '16-avos' },
-      m087: { stadium: 'Arrowhead Stadium', city: 'Kansas City', kickoffLocal: '2026-07-03T22:30:00-03:00', roundName: '16-avos' },
-      m088: { stadium: 'AT&T Stadium', city: 'Dallas', kickoffLocal: '2026-07-03T20:00:00-03:00', roundName: '16-avos' }
+      m073: { stadium: 'SoFi Stadium',            city: 'Los Angeles',        kickoffLocal: '2026-06-28T16:00:00-03:00', roundName: '16-avos de Final' },
+      m074: { stadium: 'Gillette Stadium',         city: 'Boston',             kickoffLocal: '2026-06-29T17:00:00-03:00', roundName: '16-avos de Final' },
+      m075: { stadium: 'Estadio Monterrey',        city: 'Monterrey',          kickoffLocal: '2026-06-29T22:00:00-03:00', roundName: '16-avos de Final' },
+      m076: { stadium: 'NRG Stadium',              city: 'Houston',            kickoffLocal: '2026-06-29T14:00:00-03:00', roundName: '16-avos de Final' },
+      m077: { stadium: 'MetLife Stadium',          city: 'Nova York/NJ',       kickoffLocal: '2026-06-30T18:00:00-03:00', roundName: '16-avos de Final' },
+      m078: { stadium: 'AT&T Stadium',             city: 'Dallas',             kickoffLocal: '2026-06-30T14:00:00-03:00', roundName: '16-avos de Final' },
+      m079: { stadium: 'Estadio Azteca',           city: 'Cidade do México',   kickoffLocal: '2026-06-30T22:00:00-03:00', roundName: '16-avos de Final' },
+      m080: { stadium: 'Mercedes-Benz Stadium',    city: 'Atlanta',            kickoffLocal: '2026-07-01T13:00:00-03:00', roundName: '16-avos de Final' },
+      m081: { stadium: "Levi's Stadium",           city: 'San Francisco/SJ',   kickoffLocal: '2026-07-01T21:00:00-03:00', roundName: '16-avos de Final' },
+      m082: { stadium: 'Lumen Field',              city: 'Seattle',            kickoffLocal: '2026-07-01T17:00:00-03:00', roundName: '16-avos de Final' },
+      m083: { stadium: 'BMO Field',                city: 'Toronto',            kickoffLocal: '2026-07-02T20:00:00-03:00', roundName: '16-avos de Final' },
+      m084: { stadium: 'SoFi Stadium',             city: 'Los Angeles',        kickoffLocal: '2026-07-02T16:00:00-03:00', roundName: '16-avos de Final' },
+      m085: { stadium: 'BC Place',                 city: 'Vancouver',          kickoffLocal: '2026-07-03T00:00:00-03:00', roundName: '16-avos de Final' },
+      m086: { stadium: 'Hard Rock Stadium',        city: 'Miami',              kickoffLocal: '2026-07-03T19:00:00-03:00', roundName: '16-avos de Final' },
+      m087: { stadium: 'Arrowhead Stadium',        city: 'Kansas City',        kickoffLocal: '2026-07-03T22:30:00-03:00', roundName: '16-avos de Final' },
+      m088: { stadium: 'AT&T Stadium',             city: 'Dallas',             kickoffLocal: '2026-07-03T20:00:00-03:00', roundName: '16-avos de Final' }
     };
+
+    // Oitavas de Final / Round of 16 (m089–m096): 4–7 Jul
+    // Horários Brasília: 4/Jul 14h e 18h | 5/Jul 17h e 21h | 6/Jul 15h e 20h | 7/Jul 13h e 17h
+    const roundOf16Updates = {
+      m089: { stadium: 'Lincoln Financial Field', city: 'Philadelphia',       kickoffLocal: '2026-07-04T18:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
+      m090: { stadium: 'NRG Stadium',             city: 'Houston',            kickoffLocal: '2026-07-04T14:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
+      m091: { stadium: 'MetLife Stadium',         city: 'Nova York/NJ',       kickoffLocal: '2026-07-05T17:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
+      m092: { stadium: 'Estadio Azteca',          city: 'Cidade do México',   kickoffLocal: '2026-07-05T21:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
+      m093: { stadium: 'AT&T Stadium',            city: 'Dallas',             kickoffLocal: '2026-07-06T15:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
+      m094: { stadium: 'Lumen Field',             city: 'Seattle',            kickoffLocal: '2026-07-06T20:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
+      m095: { stadium: 'Mercedes-Benz Stadium',   city: 'Atlanta',            kickoffLocal: '2026-07-07T13:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
+      m096: { stadium: 'BC Place',                city: 'Vancouver',          kickoffLocal: '2026-07-07T17:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' }
+    };
+
+    // Quartas de Final (m097–m100): 9–11 Jul
+    // 9/Jul 17h (Gillette) | 10/Jul 16h (SoFi) | 11/Jul 18h (Hard Rock) | 11/Jul 21h (Arrowhead)
+    const qfUpdates = {
+      m097: { stadium: 'Gillette Stadium',      city: 'Boston',    kickoffLocal: '2026-07-09T17:00:00-03:00', roundName: 'Quartas de Final', roundId: 'round_qf' },
+      m098: { stadium: 'SoFi Stadium',          city: 'Los Angeles', kickoffLocal: '2026-07-10T16:00:00-03:00', roundName: 'Quartas de Final', roundId: 'round_qf' },
+      m099: { stadium: 'Hard Rock Stadium',     city: 'Miami',     kickoffLocal: '2026-07-11T18:00:00-03:00', roundName: 'Quartas de Final', roundId: 'round_qf' },
+      m100: { stadium: 'Arrowhead Stadium',     city: 'Kansas City', kickoffLocal: '2026-07-11T21:00:00-03:00', roundName: 'Quartas de Final', roundId: 'round_qf' }
+    };
+
+    // Semifinais (m101–m102): 14–15 Jul
+    // 14/Jul 16h (AT&T Dallas) | 15/Jul 16h (Mercedes-Benz Atlanta)
+    const sfUpdates = {
+      m101: { stadium: 'AT&T Stadium',          city: 'Dallas',    kickoffLocal: '2026-07-14T16:00:00-03:00', roundName: 'Semifinal', roundId: 'round_sf' },
+      m102: { stadium: 'Mercedes-Benz Stadium', city: 'Atlanta',   kickoffLocal: '2026-07-15T16:00:00-03:00', roundName: 'Semifinal', roundId: 'round_sf' }
+    };
+
+    // Disputa 3° Lugar (m103): 18 Jul 18h — Hard Rock Stadium, Miami
+    const thirdPlaceUpdate = {
+      m103: { stadium: 'Hard Rock Stadium',     city: 'Miami',     kickoffLocal: '2026-07-18T18:00:00-03:00', roundName: 'Disputa 3º Lugar', roundId: 'third_place' }
+    };
+
+    // Final (m104): 19 Jul 16h — MetLife Stadium, Nova York/NJ
+    const finalUpdate = {
+      m104: { stadium: 'MetLife Stadium',       city: 'Nova York/NJ', kickoffLocal: '2026-07-19T16:00:00-03:00', roundName: 'Final', roundId: 'final' }
+    };
+
+    // Mapa completo de metadados por partida
+    const allMatchMeta = { ...roundOf32Updates, ...roundOf16Updates, ...qfUpdates, ...sfUpdates, ...thirdPlaceUpdate, ...finalUpdate };
 
     const GROUP_IDS = ['group_a','group_b','group_c','group_d','group_e','group_f','group_g','group_h','group_i','group_j','group_k','group_l'];
     
@@ -332,33 +378,37 @@ export function Admin() {
       return null;
     };
 
-    // Mapeamento das rodadas subsequentes
+    // Mapeamento das rodadas subsequentes (chaveamento FIFA oficial)
+    // Oitavas: Vencedor(m074) x Vencedor(m077), etc.
     const r16Mappings = {
-      m089: { depA: 'm074', depB: 'm077' },
-      m090: { depA: 'm073', depB: 'm075' },
-      m091: { depA: 'm076', depB: 'm078' },
-      m092: { depA: 'm079', depB: 'm080' },
-      m093: { depA: 'm083', depB: 'm084' },
-      m094: { depA: 'm081', depB: 'm082' },
-      m095: { depA: 'm086', depB: 'm088' },
-      m096: { depA: 'm085', depB: 'm087' }
+      m089: { depA: 'm074', depB: 'm077' }, // Philly — 4/Jul 18h
+      m090: { depA: 'm073', depB: 'm075' }, // Houston — 4/Jul 14h
+      m091: { depA: 'm076', depB: 'm078' }, // MetLife — 5/Jul 17h
+      m092: { depA: 'm079', depB: 'm080' }, // Azteca — 5/Jul 21h
+      m093: { depA: 'm083', depB: 'm084' }, // AT&T Dallas — 6/Jul 15h
+      m094: { depA: 'm081', depB: 'm082' }, // Seattle — 6/Jul 20h
+      m095: { depA: 'm086', depB: 'm088' }, // Atlanta — 7/Jul 13h
+      m096: { depA: 'm085', depB: 'm087' }  // Vancouver — 7/Jul 17h
     };
 
+    // Quartas: Vencedor(m089) x Vencedor(m090), etc.
     const qfMappings = {
-      m097: { depA: 'm089', depB: 'm090' },
-      m098: { depA: 'm093', depB: 'm094' },
-      m099: { depA: 'm091', depB: 'm092' },
-      m100: { depA: 'm095', depB: 'm096' }
+      m097: { depA: 'm089', depB: 'm090' }, // Gillette/Boston — 9/Jul 17h
+      m098: { depA: 'm093', depB: 'm094' }, // SoFi/LA — 10/Jul 16h
+      m099: { depA: 'm091', depB: 'm092' }, // Hard Rock/Miami — 11/Jul 18h
+      m100: { depA: 'm095', depB: 'm096' }  // Arrowhead/KC — 11/Jul 21h
     };
 
+    // Semis: Vencedor(m097) x Vencedor(m098), etc.
     const sfMappings = {
-      m101: { depA: 'm097', depB: 'm098' },
-      m102: { depA: 'm099', depB: 'm100' }
+      m101: { depA: 'm097', depB: 'm098' }, // AT&T Dallas — 14/Jul 16h
+      m102: { depA: 'm099', depB: 'm100' }  // Mercedes-Benz Atlanta — 15/Jul 16h
     };
 
+    // 3° Lugar (perdedores das semis) e Final (vencedores)
     const finalMappings = {
-      m103: { depA: 'm101', depB: 'm102', isLosers: true },
-      m104: { depA: 'm101', depB: 'm102', isLosers: false }
+      m103: { depA: 'm101', depB: 'm102', isLosers: true },  // Hard Rock Miami — 18/Jul 18h
+      m104: { depA: 'm101', depB: 'm102', isLosers: false }  // MetLife NY/NJ — 19/Jul 16h
     };
 
     // 8. Propagação em cascata no array local
@@ -399,47 +449,56 @@ export function Admin() {
       }
     }
 
-    // 9. Gravar as mudanças em batch no Firestore (incluindo renomeação da rodada e correção de horários/estádios)
+    // 9. Gravar as mudanças em batch no Firestore
+    // Inclui: renomeação das rodadas + correção de horários/estádios + times dos confrontos
     try {
       const batch = writeBatch(db);
       
-      // Atualiza o nome da rodada de 32-avos para 16-avos de Final
-      batch.update(doc(db, 'rounds', 'round_32'), {
-        name: '16-avos de Final'
-      });
+      // Renomear nomes das rodadas no Firestore
+      const roundRenames = {
+        'round_32':    '16-avos de Final',
+        'round_16':    'Oitavas de Final',
+        'round_qf':    'Quartas de Final',
+        'round_sf':    'Semifinal',
+        'third_place': 'Disputa 3º Lugar',
+        'final':       'Final'
+      };
+      for (const [roundDocId, roundName] of Object.entries(roundRenames)) {
+        batch.set(doc(db, 'rounds', roundDocId), { name: roundName }, { merge: true });
+      }
 
       let count = 0;
       for (const m of updatedMatches) {
         const original = matches.find(x => x.id === m.id);
-        if (original) {
-          const r32Upd = roundOf32Updates[m.id];
-          const hasTeamChange = original.teamAId !== m.teamAId || original.teamBId !== m.teamBId;
-          const hasMetadataChange = r32Upd && (
-            original.stadium !== r32Upd.stadium ||
-            original.city !== r32Upd.city ||
-            original.kickoffLocal !== r32Upd.kickoffLocal ||
-            original.roundName !== r32Upd.roundName
-          );
+        if (!original) continue;
 
-          if (hasTeamChange || hasMetadataChange) {
-            const updatePayload = {
-              teamAId: m.teamAId || null,
-              teamBId: m.teamBId || null
-            };
-            if (r32Upd) {
-              updatePayload.stadium = r32Upd.stadium;
-              updatePayload.city = r32Upd.city;
-              updatePayload.kickoffLocal = r32Upd.kickoffLocal;
-              updatePayload.roundName = r32Upd.roundName;
-            }
-            batch.update(doc(db, 'matches', m.id), updatePayload);
-            count++;
+        const meta = allMatchMeta[m.id];
+        const hasTeamChange = original.teamAId !== m.teamAId || original.teamBId !== m.teamBId;
+        const hasMetadataChange = meta && (
+          original.stadium !== meta.stadium ||
+          original.city !== meta.city ||
+          original.kickoffLocal !== meta.kickoffLocal ||
+          original.roundName !== meta.roundName
+        );
+
+        if (hasTeamChange || hasMetadataChange) {
+          const updatePayload = {
+            teamAId: m.teamAId || null,
+            teamBId: m.teamBId || null
+          };
+          if (meta) {
+            updatePayload.stadium    = meta.stadium;
+            updatePayload.city       = meta.city;
+            updatePayload.kickoffLocal = meta.kickoffLocal;
+            updatePayload.roundName  = meta.roundName;
           }
+          batch.update(doc(db, 'matches', m.id), updatePayload);
+          count++;
         }
       }
       
       await batch.commit();
-      alert(`Mata-mata atualizado com sucesso! A rodada foi renomeada para "16-avos de Final" e ${count} partidas foram corrigidas com horários oficiais, estádios e equipes correspondentes. ✓`);
+      alert(`✅ Mata-mata atualizado! Rodadas renomeadas (16-avos→Oitavas→Quartas→Semis→Final) e ${count} partidas corrigidas com horários oficiais da FIFA 2026.`);
       fetchRounds();
       fetchMatches();
     } catch (err) {
