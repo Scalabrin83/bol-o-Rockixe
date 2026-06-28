@@ -143,7 +143,7 @@ export function Admin() {
     // 16-avos de Final (m073–m088): 28 Jun – 3 Jul
     const roundOf32Updates = {
       m073: { stadium: 'SoFi Stadium',            city: 'Los Angeles',        kickoffLocal: '2026-06-28T16:00:00-03:00', roundName: '16-avos de Final' },
-      m074: { stadium: 'Gillette Stadium',         city: 'Boston',             kickoffLocal: '2026-06-29T17:00:00-03:00', roundName: '16-avos de Final' },
+      m074: { stadium: 'Gillette Stadium',         city: 'Boston',             kickoffLocal: '2026-06-29T17:30:00-03:00', roundName: '16-avos de Final' },
       m075: { stadium: 'Estadio Monterrey',        city: 'Monterrey',          kickoffLocal: '2026-06-29T22:00:00-03:00', roundName: '16-avos de Final' },
       m076: { stadium: 'NRG Stadium',              city: 'Houston',            kickoffLocal: '2026-06-29T14:00:00-03:00', roundName: '16-avos de Final' },
       m077: { stadium: 'MetLife Stadium',          city: 'Nova York/NJ',       kickoffLocal: '2026-06-30T18:00:00-03:00', roundName: '16-avos de Final' },
