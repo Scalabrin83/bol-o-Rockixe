@@ -145,7 +145,23 @@ export function Palpites() {
 
   const handleScoreChange = (matchId, team, value) => {
     if (value !== '' && !/^\d+$/.test(value)) return;
-    setPredictions(prev => ({ ...prev, [matchId]: { ...prev[matchId], [team]: value } }));
+    setPredictions(prev => ({
+      ...prev,
+      [matchId]: {
+        ...prev[matchId],
+        [team]: value,
+        // Limpa o penaltyWinnerId ao alterar o placar (pode deixar de ser empate)
+        ...(team === 'scoreA' || team === 'scoreB' ? { penaltyWinnerId: undefined } : {})
+      }
+    }));
+  };
+
+  // Handler dedicado para seleção do vencedor nos pênaltis (ID do time não é numérico)
+  const handlePenaltyWinner = (matchId, teamId) => {
+    setPredictions(prev => ({
+      ...prev,
+      [matchId]: { ...prev[matchId], penaltyWinnerId: teamId }
+    }));
   };
 
   const handleSavePrediction = async (match) => {
@@ -250,7 +266,10 @@ export function Palpites() {
         const teamB = teams[match.teamBId];
 
         const isKnockout = !match.groupId;
-        const needsPenaltyWinner = isKnockout && pred.scoreA !== undefined && pred.scoreB !== undefined && pred.scoreA !== '' && pred.scoreB !== '' && pred.scoreA === pred.scoreB;
+        const predAInt = parseInt(pred.scoreA, 10);
+        const predBInt = parseInt(pred.scoreB, 10);
+        const hasValidScore = pred.scoreA !== undefined && pred.scoreB !== undefined && pred.scoreA !== '' && pred.scoreB !== '' && !isNaN(predAInt) && !isNaN(predBInt);
+        const needsPenaltyWinner = isKnockout && hasValidScore && predAInt === predBInt;
         const isSaveDisabled = saving || (needsPenaltyWinner && !pred.penaltyWinnerId);
 
         const groupLabel = match.groupId ? match.groupId.replace('group_', 'Grupo ').toUpperCase() : (currentRound?.name || '');
@@ -330,18 +349,34 @@ export function Palpites() {
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button 
-                    onClick={() => handleScoreChange(match.id, 'penaltyWinnerId', match.teamAId)}
+                    onClick={() => handlePenaltyWinner(match.id, match.teamAId)}
                     disabled={isLocked}
-                    style={{ flex: 1, padding: '8px', borderRadius: '6px', border: pred.penaltyWinnerId === match.teamAId ? '2px solid var(--primary)' : '1px solid var(--border-color)', background: pred.penaltyWinnerId === match.teamAId ? 'rgba(212,168,67,0.1)' : 'transparent', color: '#fff', cursor: isLocked ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: '14px' }}
+                    style={{
+                      flex: 1, padding: '8px', borderRadius: '6px',
+                      border: pred.penaltyWinnerId === match.teamAId ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                      background: pred.penaltyWinnerId === match.teamAId ? 'rgba(212,168,67,0.2)' : 'transparent',
+                      color: pred.penaltyWinnerId === match.teamAId ? 'var(--primary)' : '#fff',
+                      cursor: isLocked ? 'not-allowed' : 'pointer',
+                      fontWeight: 700, fontSize: '14px',
+                      transition: 'all 0.15s ease'
+                    }}
                   >
-                    {teamA?.name}
+                    {TEAM_FLAGS[match.teamAId] || '🏳️'} {teamA?.name}
                   </button>
                   <button 
-                    onClick={() => handleScoreChange(match.id, 'penaltyWinnerId', match.teamBId)}
+                    onClick={() => handlePenaltyWinner(match.id, match.teamBId)}
                     disabled={isLocked}
-                    style={{ flex: 1, padding: '8px', borderRadius: '6px', border: pred.penaltyWinnerId === match.teamBId ? '2px solid var(--primary)' : '1px solid var(--border-color)', background: pred.penaltyWinnerId === match.teamBId ? 'rgba(212,168,67,0.1)' : 'transparent', color: '#fff', cursor: isLocked ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: '14px' }}
+                    style={{
+                      flex: 1, padding: '8px', borderRadius: '6px',
+                      border: pred.penaltyWinnerId === match.teamBId ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                      background: pred.penaltyWinnerId === match.teamBId ? 'rgba(212,168,67,0.2)' : 'transparent',
+                      color: pred.penaltyWinnerId === match.teamBId ? 'var(--primary)' : '#fff',
+                      cursor: isLocked ? 'not-allowed' : 'pointer',
+                      fontWeight: 700, fontSize: '14px',
+                      transition: 'all 0.15s ease'
+                    }}
                   >
-                    {teamB?.name}
+                    {TEAM_FLAGS[match.teamBId] || '🏳️'} {teamB?.name}
                   </button>
                 </div>
               </div>
