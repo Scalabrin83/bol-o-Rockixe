@@ -566,18 +566,22 @@ export function Admin() {
             const ptsForExact = isKnockout ? 6 : 6;
             const ptsForWin = isKnockout ? 3 : 3;
 
-            // Quem passa de fase
-            let offQualifier = null;
-            let predQualifier = null;
-
+            // Bônus de "quem passa" no mata-mata
+            // REGRA: só para quem apostou EMPATE (predA === predB) e acertou o vencedor nos pênaltis
             if (isKnockout) {
+              // Quem realmente avançou (oficial)
+              let offQualifier = null;
               if (offA > offB) offQualifier = match.teamAId;
               else if (offB > offA) offQualifier = match.teamBId;
               else offQualifier = match.officialPenaltyWinnerId;
 
-              if (predA > predB) predQualifier = match.teamAId;
-              else if (predB > predA) predQualifier = match.teamBId;
-              else predQualifier = pred.penaltyWinnerId;
+              // Qualificador previsto: só contabilizado se o apostador apostou empate
+              const predIsDraw = (predA === predB);
+              const predQualifier = predIsDraw ? pred.penaltyWinnerId : null;
+
+              if (offQualifier && predQualifier && predQualifier === offQualifier) {
+                totalPoints += 3;
+              }
             }
 
             if (predA === offA && predB === offB) {
@@ -591,10 +595,6 @@ export function Admin() {
               }
             }
 
-            // Bônus de "quem passa" no mata-mata
-            if (isKnockout && offQualifier && predQualifier === offQualifier) {
-              totalPoints += 3;
-            }
           }
         }
         
