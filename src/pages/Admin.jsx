@@ -133,377 +133,281 @@ export function Admin() {
     }
   };
 
-  const handleAutoResolveKnockouts = async () => {
-    if (!window.confirm("Deseja gerar/atualizar automaticamente todos os confrontos do mata-mata com base nos resultados dos grupos? (Mudanças manuais não salvas serão sobrescritas)")) return;
-    
-    // ============================================================
-    // METADADOS OFICIAIS FIFA 2026 — Horários em Brasília (BRT -03:00)
-    // ============================================================
+  // ============================================================
+  // Metadados oficiais FIFA 2026 (horários BRT, estádios, cidades)
+  // ============================================================
+  const ALL_MATCH_META = {
+    // 16-avos de Final
+    m073: { stadium: 'SoFi Stadium',            city: 'Los Angeles',      kickoffLocal: '2026-06-28T16:00:00-03:00', roundName: '16-avos de Final' },
+    m074: { stadium: 'Gillette Stadium',         city: 'Boston',           kickoffLocal: '2026-06-29T17:30:00-03:00', roundName: '16-avos de Final' },
+    m075: { stadium: 'Estadio Monterrey',        city: 'Monterrey',        kickoffLocal: '2026-06-29T22:00:00-03:00', roundName: '16-avos de Final' },
+    m076: { stadium: 'NRG Stadium',              city: 'Houston',          kickoffLocal: '2026-06-29T14:00:00-03:00', roundName: '16-avos de Final' },
+    m077: { stadium: 'MetLife Stadium',          city: 'Nova York/NJ',     kickoffLocal: '2026-06-30T18:00:00-03:00', roundName: '16-avos de Final' },
+    m078: { stadium: 'AT&T Stadium',             city: 'Dallas',           kickoffLocal: '2026-06-30T14:00:00-03:00', roundName: '16-avos de Final' },
+    m079: { stadium: 'Estadio Azteca',           city: 'Cidade do México', kickoffLocal: '2026-06-30T22:00:00-03:00', roundName: '16-avos de Final' },
+    m080: { stadium: 'Mercedes-Benz Stadium',   city: 'Atlanta',          kickoffLocal: '2026-07-01T13:00:00-03:00', roundName: '16-avos de Final' },
+    m081: { stadium: "Levi's Stadium",           city: 'San Francisco/SJ', kickoffLocal: '2026-07-01T21:00:00-03:00', roundName: '16-avos de Final' },
+    m082: { stadium: 'Lumen Field',              city: 'Seattle',          kickoffLocal: '2026-07-01T17:00:00-03:00', roundName: '16-avos de Final' },
+    m083: { stadium: 'BMO Field',                city: 'Toronto',          kickoffLocal: '2026-07-02T20:00:00-03:00', roundName: '16-avos de Final' },
+    m084: { stadium: 'SoFi Stadium',             city: 'Los Angeles',      kickoffLocal: '2026-07-02T16:00:00-03:00', roundName: '16-avos de Final' },
+    m085: { stadium: 'BC Place',                 city: 'Vancouver',        kickoffLocal: '2026-07-03T00:00:00-03:00', roundName: '16-avos de Final' },
+    m086: { stadium: 'Hard Rock Stadium',        city: 'Miami',            kickoffLocal: '2026-07-03T19:00:00-03:00', roundName: '16-avos de Final' },
+    m087: { stadium: 'Arrowhead Stadium',        city: 'Kansas City',      kickoffLocal: '2026-07-03T22:30:00-03:00', roundName: '16-avos de Final' },
+    m088: { stadium: 'AT&T Stadium',             city: 'Dallas',           kickoffLocal: '2026-07-03T20:00:00-03:00', roundName: '16-avos de Final' },
+    // Oitavas de Final
+    m089: { stadium: 'Lincoln Financial Field', city: 'Philadelphia',     kickoffLocal: '2026-07-04T18:00:00-03:00', roundName: 'Oitavas de Final' },
+    m090: { stadium: 'NRG Stadium',             city: 'Houston',          kickoffLocal: '2026-07-04T14:00:00-03:00', roundName: 'Oitavas de Final' },
+    m091: { stadium: 'MetLife Stadium',         city: 'Nova York/NJ',     kickoffLocal: '2026-07-05T17:00:00-03:00', roundName: 'Oitavas de Final' },
+    m092: { stadium: 'Estadio Azteca',          city: 'Cidade do México', kickoffLocal: '2026-07-05T21:00:00-03:00', roundName: 'Oitavas de Final' },
+    m093: { stadium: 'AT&T Stadium',            city: 'Dallas',           kickoffLocal: '2026-07-06T15:00:00-03:00', roundName: 'Oitavas de Final' },
+    m094: { stadium: 'Lumen Field',             city: 'Seattle',          kickoffLocal: '2026-07-06T20:00:00-03:00', roundName: 'Oitavas de Final' },
+    m095: { stadium: 'Mercedes-Benz Stadium',   city: 'Atlanta',          kickoffLocal: '2026-07-07T13:00:00-03:00', roundName: 'Oitavas de Final' },
+    m096: { stadium: 'BC Place',               city: 'Vancouver',        kickoffLocal: '2026-07-07T17:00:00-03:00', roundName: 'Oitavas de Final' },
+    // Quartas de Final
+    m097: { stadium: 'Gillette Stadium',        city: 'Boston',           kickoffLocal: '2026-07-09T17:00:00-03:00', roundName: 'Quartas de Final' },
+    m098: { stadium: 'SoFi Stadium',            city: 'Los Angeles',      kickoffLocal: '2026-07-10T16:00:00-03:00', roundName: 'Quartas de Final' },
+    m099: { stadium: 'Hard Rock Stadium',       city: 'Miami',            kickoffLocal: '2026-07-11T18:00:00-03:00', roundName: 'Quartas de Final' },
+    m100: { stadium: 'Arrowhead Stadium',       city: 'Kansas City',      kickoffLocal: '2026-07-11T21:00:00-03:00', roundName: 'Quartas de Final' },
+    // Semifinais
+    m101: { stadium: 'AT&T Stadium',            city: 'Dallas',           kickoffLocal: '2026-07-14T16:00:00-03:00', roundName: 'Semifinal' },
+    m102: { stadium: 'Mercedes-Benz Stadium',   city: 'Atlanta',          kickoffLocal: '2026-07-15T16:00:00-03:00', roundName: 'Semifinal' },
+    // 3° Lugar e Final
+    m103: { stadium: 'Hard Rock Stadium',       city: 'Miami',            kickoffLocal: '2026-07-18T18:00:00-03:00', roundName: 'Disputa 3º Lugar' },
+    m104: { stadium: 'MetLife Stadium',         city: 'Nova York/NJ',     kickoffLocal: '2026-07-19T16:00:00-03:00', roundName: 'Final' },
+  };
 
-    // 16-avos de Final (m073–m088): 28 Jun – 3 Jul
-    const roundOf32Updates = {
-      m073: { stadium: 'SoFi Stadium',            city: 'Los Angeles',        kickoffLocal: '2026-06-28T16:00:00-03:00', roundName: '16-avos de Final' },
-      m074: { stadium: 'Gillette Stadium',         city: 'Boston',             kickoffLocal: '2026-06-29T17:30:00-03:00', roundName: '16-avos de Final' },
-      m075: { stadium: 'Estadio Monterrey',        city: 'Monterrey',          kickoffLocal: '2026-06-29T22:00:00-03:00', roundName: '16-avos de Final' },
-      m076: { stadium: 'NRG Stadium',              city: 'Houston',            kickoffLocal: '2026-06-29T14:00:00-03:00', roundName: '16-avos de Final' },
-      m077: { stadium: 'MetLife Stadium',          city: 'Nova York/NJ',       kickoffLocal: '2026-06-30T18:00:00-03:00', roundName: '16-avos de Final' },
-      m078: { stadium: 'AT&T Stadium',             city: 'Dallas',             kickoffLocal: '2026-06-30T14:00:00-03:00', roundName: '16-avos de Final' },
-      m079: { stadium: 'Estadio Azteca',           city: 'Cidade do México',   kickoffLocal: '2026-06-30T22:00:00-03:00', roundName: '16-avos de Final' },
-      m080: { stadium: 'Mercedes-Benz Stadium',    city: 'Atlanta',            kickoffLocal: '2026-07-01T13:00:00-03:00', roundName: '16-avos de Final' },
-      m081: { stadium: "Levi's Stadium",           city: 'San Francisco/SJ',   kickoffLocal: '2026-07-01T21:00:00-03:00', roundName: '16-avos de Final' },
-      m082: { stadium: 'Lumen Field',              city: 'Seattle',            kickoffLocal: '2026-07-01T17:00:00-03:00', roundName: '16-avos de Final' },
-      m083: { stadium: 'BMO Field',                city: 'Toronto',            kickoffLocal: '2026-07-02T20:00:00-03:00', roundName: '16-avos de Final' },
-      m084: { stadium: 'SoFi Stadium',             city: 'Los Angeles',        kickoffLocal: '2026-07-02T16:00:00-03:00', roundName: '16-avos de Final' },
-      m085: { stadium: 'BC Place',                 city: 'Vancouver',          kickoffLocal: '2026-07-03T00:00:00-03:00', roundName: '16-avos de Final' },
-      m086: { stadium: 'Hard Rock Stadium',        city: 'Miami',              kickoffLocal: '2026-07-03T19:00:00-03:00', roundName: '16-avos de Final' },
-      m087: { stadium: 'Arrowhead Stadium',        city: 'Kansas City',        kickoffLocal: '2026-07-03T22:30:00-03:00', roundName: '16-avos de Final' },
-      m088: { stadium: 'AT&T Stadium',             city: 'Dallas',             kickoffLocal: '2026-07-03T20:00:00-03:00', roundName: '16-avos de Final' }
+  // ============================================================
+  // Auxiliar: vencedor de uma partida (pelo resultado oficial salvo)
+  // ============================================================
+  const getWinnerFromMatch = (m) => {
+    if (!m || m.status !== 'finished') return null;
+    const sA = parseInt(m.officialScoreA, 10);
+    const sB = parseInt(m.officialScoreB, 10);
+    if (isNaN(sA) || isNaN(sB)) return null;
+    if (sA > sB) return m.teamAId;
+    if (sB > sA) return m.teamBId;
+    return m.officialPenaltyWinnerId || null;
+  };
+
+  const getLoserFromMatch = (m) => {
+    if (!m || m.status !== 'finished') return null;
+    const sA = parseInt(m.officialScoreA, 10);
+    const sB = parseInt(m.officialScoreB, 10);
+    if (isNaN(sA) || isNaN(sB)) return null;
+    if (sA > sB) return m.teamBId;
+    if (sB > sA) return m.teamAId;
+    if (m.officialPenaltyWinnerId === m.teamAId) return m.teamBId;
+    if (m.officialPenaltyWinnerId === m.teamBId) return m.teamAId;
+    return null;
+  };
+
+  // ============================================================
+  // Preencher times SOMENTE da rodada atual selecionada
+  // NÃO toca em nenhuma outra rodada
+  // ============================================================
+  const handleFillCurrentRound = async () => {
+    const roundLabels = {
+      round_32:    '16-avos de Final',
+      round_16:    'Oitavas de Final',
+      round_qf:    'Quartas de Final',
+      round_sf:    'Semifinal',
+      third_place: 'Disputa 3º Lugar',
+      final:       'Final',
     };
+    const roundLabel = roundLabels[selectedRound] || selectedRound;
 
-    // Oitavas de Final / Round of 16 (m089–m096): 4–7 Jul
-    // Horários Brasília: 4/Jul 14h e 18h | 5/Jul 17h e 21h | 6/Jul 15h e 20h | 7/Jul 13h e 17h
-    const roundOf16Updates = {
-      m089: { stadium: 'Lincoln Financial Field', city: 'Philadelphia',       kickoffLocal: '2026-07-04T18:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
-      m090: { stadium: 'NRG Stadium',             city: 'Houston',            kickoffLocal: '2026-07-04T14:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
-      m091: { stadium: 'MetLife Stadium',         city: 'Nova York/NJ',       kickoffLocal: '2026-07-05T17:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
-      m092: { stadium: 'Estadio Azteca',          city: 'Cidade do México',   kickoffLocal: '2026-07-05T21:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
-      m093: { stadium: 'AT&T Stadium',            city: 'Dallas',             kickoffLocal: '2026-07-06T15:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
-      m094: { stadium: 'Lumen Field',             city: 'Seattle',            kickoffLocal: '2026-07-06T20:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
-      m095: { stadium: 'Mercedes-Benz Stadium',   city: 'Atlanta',            kickoffLocal: '2026-07-07T13:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' },
-      m096: { stadium: 'BC Place',                city: 'Vancouver',          kickoffLocal: '2026-07-07T17:00:00-03:00', roundName: 'Oitavas de Final', roundId: 'round_16' }
-    };
+    if (!window.confirm(
+      `Preencher automaticamente os TIMES da rodada "${roundLabel}" com base nos resultados da fase anterior?\n\n` +
+      `⚠️ Apenas esta rodada será alterada. As demais não serão tocadas.`
+    )) return;
 
-    // Quartas de Final (m097–m100): 9–11 Jul
-    // 9/Jul 17h (Gillette) | 10/Jul 16h (SoFi) | 11/Jul 18h (Hard Rock) | 11/Jul 21h (Arrowhead)
-    const qfUpdates = {
-      m097: { stadium: 'Gillette Stadium',      city: 'Boston',    kickoffLocal: '2026-07-09T17:00:00-03:00', roundName: 'Quartas de Final', roundId: 'round_qf' },
-      m098: { stadium: 'SoFi Stadium',          city: 'Los Angeles', kickoffLocal: '2026-07-10T16:00:00-03:00', roundName: 'Quartas de Final', roundId: 'round_qf' },
-      m099: { stadium: 'Hard Rock Stadium',     city: 'Miami',     kickoffLocal: '2026-07-11T18:00:00-03:00', roundName: 'Quartas de Final', roundId: 'round_qf' },
-      m100: { stadium: 'Arrowhead Stadium',     city: 'Kansas City', kickoffLocal: '2026-07-11T21:00:00-03:00', roundName: 'Quartas de Final', roundId: 'round_qf' }
-    };
+    // Helper: buscar partida no state local pelo id
+    const getMatch = (id) => matches.find(x => x.id === id);
 
-    // Semifinais (m101–m102): 14–15 Jul
-    // 14/Jul 16h (AT&T Dallas) | 15/Jul 16h (Mercedes-Benz Atlanta)
-    const sfUpdates = {
-      m101: { stadium: 'AT&T Stadium',          city: 'Dallas',    kickoffLocal: '2026-07-14T16:00:00-03:00', roundName: 'Semifinal', roundId: 'round_sf' },
-      m102: { stadium: 'Mercedes-Benz Stadium', city: 'Atlanta',   kickoffLocal: '2026-07-15T16:00:00-03:00', roundName: 'Semifinal', roundId: 'round_sf' }
-    };
+    // Calcular times para cada partida da rodada atual
+    const updates = {}; // { matchId: { teamAId, teamBId } }
 
-    // Disputa 3° Lugar (m103): 18 Jul 18h — Hard Rock Stadium, Miami
-    const thirdPlaceUpdate = {
-      m103: { stadium: 'Hard Rock Stadium',     city: 'Miami',     kickoffLocal: '2026-07-18T18:00:00-03:00', roundName: 'Disputa 3º Lugar', roundId: 'third_place' }
-    };
-
-    // Final (m104): 19 Jul 16h — MetLife Stadium, Nova York/NJ
-    const finalUpdate = {
-      m104: { stadium: 'MetLife Stadium',       city: 'Nova York/NJ', kickoffLocal: '2026-07-19T16:00:00-03:00', roundName: 'Final', roundId: 'final' }
-    };
-
-    // Mapa completo de metadados por partida
-    const allMatchMeta = { ...roundOf32Updates, ...roundOf16Updates, ...qfUpdates, ...sfUpdates, ...thirdPlaceUpdate, ...finalUpdate };
-
-    const GROUP_IDS = ['group_a','group_b','group_c','group_d','group_e','group_f','group_g','group_h','group_i','group_j','group_k','group_l'];
-    
-    // 1. Calcular a classificação local para cada um dos 12 grupos
-    const standingsByGroup = {};
-    for (const gid of GROUP_IDS) {
-      const groupTeams = teams.filter(t => t.groupId === gid).map(t => t.id);
-      const finishedGroupMatches = matches.filter(
-        m => m.groupId === gid && m.status === 'finished' && m.teamAId && m.teamBId
-      );
-      
-      const stats = {};
-      groupTeams.forEach(id => {
-        stats[id] = { id, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 };
-      });
-      
-      finishedGroupMatches.forEach(m => {
-        const a = stats[m.teamAId];
-        const b = stats[m.teamBId];
-        if (!a || !b) return;
-        
-        const gA = parseInt(m.officialScoreA, 10);
-        const gB = parseInt(m.officialScoreB, 10);
-        
-        a.p++; b.p++;
-        a.gf += gA; a.ga += gB;
-        b.gf += gB; b.ga += gA;
-        
-        if (gA > gB) { a.w++; a.pts += 3; b.l++; }
-        else if (gB > gA) { b.w++; b.pts += 3; a.l++; }
-        else { a.d++; b.d++; a.pts += 1; b.pts += 1; }
-      });
-      
-      const sorted = Object.values(stats).sort((a, b) => 
-        b.pts - a.pts || 
-        (b.gf - b.ga) - (a.gf - a.ga) || 
-        b.gf - a.gf
-      );
-      standingsByGroup[gid] = sorted;
-    }
-
-    // 2. Extrair 1os, 2os e 3os
-    const firstPlaces = {};
-    const secondPlaces = {};
-    const thirdPlacesList = [];
-    
-    for (const gid of GROUP_IDS) {
-      const list = standingsByGroup[gid] || [];
-      if (list[0]) firstPlaces[gid] = list[0].id;
-      if (list[1]) secondPlaces[gid] = list[1].id;
-      if (list[2]) {
-        thirdPlacesList.push({
-          id: list[2].id,
-          groupId: gid,
-          pts: list[2].pts,
-          sg: list[2].gf - list[2].ga,
-          gp: list[2].gf
+    if (selectedRound === 'round_32') {
+      // ── 16-avos: baseado na classificação dos grupos ──
+      const GROUP_IDS = ['group_a','group_b','group_c','group_d','group_e','group_f',
+                         'group_g','group_h','group_i','group_j','group_k','group_l'];
+      const standingsByGroup = {};
+      for (const gid of GROUP_IDS) {
+        const groupTeams = teams.filter(t => t.groupId === gid).map(t => t.id);
+        const finishedGroupMatches = matches.filter(
+          m => m.groupId === gid && m.status === 'finished' && m.teamAId && m.teamBId
+        );
+        const stats = {};
+        groupTeams.forEach(id => { stats[id] = { id, p:0, w:0, d:0, l:0, gf:0, ga:0, pts:0, groupId: gid }; });
+        finishedGroupMatches.forEach(m => {
+          const a = stats[m.teamAId]; const b = stats[m.teamBId];
+          if (!a || !b) return;
+          const gA = parseInt(m.officialScoreA,10); const gB = parseInt(m.officialScoreB,10);
+          a.p++; b.p++; a.gf+=gA; a.ga+=gB; b.gf+=gB; b.ga+=gA;
+          if (gA>gB){a.w++;a.pts+=3;b.l++;}else if(gB>gA){b.w++;b.pts+=3;a.l++;}else{a.d++;b.d++;a.pts+=1;b.pts+=1;}
         });
+        standingsByGroup[gid] = Object.values(stats).sort((a,b)=>
+          b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf
+        );
       }
-    }
-
-    // 3. Ordenar 3os colocados para selecionar os 8 melhores
-    thirdPlacesList.sort((a, b) => 
-      b.pts - a.pts || 
-      b.sg - a.sg || 
-      b.gp - a.gp
-    );
-    const bestEightThirds = thirdPlacesList.slice(0, 8);
-
-    // 4. Backtracking para resolver os 8 terceiros colocados contra os 8 vencedores de grupo elegíveis
-    const slots = [
-      { matchId: 'm074', groupWinner: 'group_e', allowedGroups: ['group_a', 'group_b', 'group_c', 'group_d', 'group_f'] },
-      { matchId: 'm077', groupWinner: 'group_i', allowedGroups: ['group_c', 'group_d', 'group_f', 'group_g', 'group_h'] },
-      { matchId: 'm079', groupWinner: 'group_a', allowedGroups: ['group_c', 'group_e', 'group_f', 'group_h', 'group_i'] },
-      { matchId: 'm080', groupWinner: 'group_l', allowedGroups: ['group_e', 'group_h', 'group_i', 'group_j', 'group_k'] },
-      { matchId: 'm081', groupWinner: 'group_d', allowedGroups: ['group_b', 'group_e', 'group_f', 'group_i', 'group_j'] },
-      { matchId: 'm082', groupWinner: 'group_g', allowedGroups: ['group_a', 'group_e', 'group_h', 'group_i', 'group_j'] },
-      { matchId: 'm085', groupWinner: 'group_b', allowedGroups: ['group_e', 'group_f', 'group_g', 'group_i', 'group_j'] },
-      { matchId: 'm087', groupWinner: 'group_k', allowedGroups: ['group_d', 'group_e', 'group_i', 'group_j', 'group_l'] }
-    ];
-
-    const thirdsAssignment = {};
-    const usedThirds = new Set();
-    
-    function backtrack(slotIndex) {
-      if (slotIndex === slots.length) return true;
-      const slot = slots[slotIndex];
-      for (const team of bestEightThirds) {
-        if (usedThirds.has(team.id)) continue;
-        if (slot.allowedGroups.includes(team.groupId)) {
-          thirdsAssignment[slot.matchId] = team.id;
-          usedThirds.add(team.id);
-          if (backtrack(slotIndex + 1)) return true;
-          usedThirds.delete(team.id);
-          delete thirdsAssignment[slot.matchId];
+      const firstPlaces  = {}; const secondPlaces = {}; const thirdPlacesList = [];
+      for (const gid of GROUP_IDS) {
+        const list = standingsByGroup[gid] || [];
+        if (list[0]) firstPlaces[gid]  = list[0].id;
+        if (list[1]) secondPlaces[gid] = list[1].id;
+        if (list[2]) thirdPlacesList.push({ id: list[2].id, groupId: gid, pts: list[2].pts, sg: list[2].gf-list[2].ga, gp: list[2].gf });
+      }
+      thirdPlacesList.sort((a,b)=>b.pts-a.pts||b.sg-a.sg||b.gp-a.gp);
+      const bestEightThirds = thirdPlacesList.slice(0,8);
+      const slots = [
+        { matchId:'m074', groupWinner:'group_e', allowedGroups:['group_a','group_b','group_c','group_d','group_f'] },
+        { matchId:'m077', groupWinner:'group_i', allowedGroups:['group_c','group_d','group_f','group_g','group_h'] },
+        { matchId:'m079', groupWinner:'group_a', allowedGroups:['group_c','group_e','group_f','group_h','group_i'] },
+        { matchId:'m080', groupWinner:'group_l', allowedGroups:['group_e','group_h','group_i','group_j','group_k'] },
+        { matchId:'m081', groupWinner:'group_d', allowedGroups:['group_b','group_e','group_f','group_i','group_j'] },
+        { matchId:'m082', groupWinner:'group_g', allowedGroups:['group_a','group_e','group_h','group_i','group_j'] },
+        { matchId:'m085', groupWinner:'group_b', allowedGroups:['group_e','group_f','group_g','group_i','group_j'] },
+        { matchId:'m087', groupWinner:'group_k', allowedGroups:['group_d','group_e','group_i','group_j','group_l'] },
+      ];
+      const thirdsAssignment = {}; const usedThirds = new Set();
+      function backtrack(i) {
+        if (i===slots.length) return true;
+        for (const t of bestEightThirds) {
+          if (usedThirds.has(t.id)) continue;
+          if (slots[i].allowedGroups.includes(t.groupId)) {
+            thirdsAssignment[slots[i].matchId]=t.id; usedThirds.add(t.id);
+            if (backtrack(i+1)) return true;
+            usedThirds.delete(t.id); delete thirdsAssignment[slots[i].matchId];
+          }
         }
+        return false;
       }
-      return false;
-    }
-    
-    const backtrackingSuccess = backtrack(0);
-    
-    // Fallback em caso de falha de backtracking (Copa do Mundo modificada ou teste manual)
-    if (!backtrackingSuccess) {
-      const remainingThirds = [...bestEightThirds];
-      for (const slot of slots) {
-        const team = remainingThirds.find(t => slot.allowedGroups.includes(t.groupId)) || remainingThirds[0];
-        if (team) {
-          thirdsAssignment[slot.matchId] = team.id;
-          const idx = remainingThirds.indexOf(team);
-          if (idx > -1) remainingThirds.splice(idx, 1);
-        }
+      if (!backtrack(0)) {
+        const rem=[...bestEightThirds];
+        for (const s of slots) { const t=rem.find(t=>s.allowedGroups.includes(t.groupId))||rem[0]; if(t){thirdsAssignment[s.matchId]=t.id; rem.splice(rem.indexOf(t),1);} }
       }
-    }
-
-    // 5. Mapear o chaveamento completo da rodada de 32-avos (agora 16-avos)
-    const r32Mappings = {
-      m073: { teamA: secondPlaces['group_a'], teamB: secondPlaces['group_b'] },
-      m074: { teamA: firstPlaces['group_e'], teamB: thirdsAssignment['m074'] },
-      m075: { teamA: firstPlaces['group_f'], teamB: secondPlaces['group_c'] },
-      m076: { teamA: firstPlaces['group_c'], teamB: secondPlaces['group_f'] },
-      m077: { teamA: firstPlaces['group_i'], teamB: thirdsAssignment['m077'] },
-      m078: { teamA: secondPlaces['group_e'], teamB: secondPlaces['group_i'] },
-      m079: { teamA: firstPlaces['group_a'], teamB: thirdsAssignment['m079'] },
-      m080: { teamA: firstPlaces['group_l'], teamB: thirdsAssignment['m080'] },
-      m081: { teamA: firstPlaces['group_d'], teamB: thirdsAssignment['m081'] },
-      m082: { teamA: firstPlaces['group_g'], teamB: thirdsAssignment['m082'] },
-      m083: { teamA: secondPlaces['group_k'], teamB: secondPlaces['group_l'] },
-      m084: { teamA: firstPlaces['group_h'], teamB: secondPlaces['group_j'] },
-      m085: { teamA: firstPlaces['group_b'], teamB: thirdsAssignment['m085'] },
-      m086: { teamA: firstPlaces['group_j'], teamB: secondPlaces['group_h'] },
-      m087: { teamA: firstPlaces['group_k'], teamB: thirdsAssignment['m087'] },
-      m088: { teamA: secondPlaces['group_d'], teamB: secondPlaces['group_g'] }
-    };
-
-    const updatedMatches = matches.map(m => ({ ...m }));
-    
-    // 6. Atualizar a rodada de 16-avos no array local
-    for (const m of updatedMatches) {
-      if (m.roundId === 'round_32') {
-        const mapping = r32Mappings[m.id];
-        if (mapping) {
-          m.teamAId = mapping.teamA || null;
-          m.teamBId = mapping.teamB || null;
-        }
+      const r32Mappings = {
+        m073:{ teamA:secondPlaces['group_a'],    teamB:secondPlaces['group_b'] },
+        m074:{ teamA:firstPlaces['group_e'],     teamB:thirdsAssignment['m074'] },
+        m075:{ teamA:firstPlaces['group_f'],     teamB:secondPlaces['group_c'] },
+        m076:{ teamA:firstPlaces['group_c'],     teamB:secondPlaces['group_f'] },
+        m077:{ teamA:firstPlaces['group_i'],     teamB:thirdsAssignment['m077'] },
+        m078:{ teamA:secondPlaces['group_e'],    teamB:secondPlaces['group_i'] },
+        m079:{ teamA:firstPlaces['group_a'],     teamB:thirdsAssignment['m079'] },
+        m080:{ teamA:firstPlaces['group_l'],     teamB:thirdsAssignment['m080'] },
+        m081:{ teamA:firstPlaces['group_d'],     teamB:thirdsAssignment['m081'] },
+        m082:{ teamA:firstPlaces['group_g'],     teamB:thirdsAssignment['m082'] },
+        m083:{ teamA:secondPlaces['group_k'],    teamB:secondPlaces['group_l'] },
+        m084:{ teamA:firstPlaces['group_h'],     teamB:secondPlaces['group_j'] },
+        m085:{ teamA:firstPlaces['group_b'],     teamB:thirdsAssignment['m085'] },
+        m086:{ teamA:firstPlaces['group_j'],     teamB:secondPlaces['group_h'] },
+        m087:{ teamA:firstPlaces['group_k'],     teamB:thirdsAssignment['m087'] },
+        m088:{ teamA:secondPlaces['group_d'],    teamB:secondPlaces['group_g'] },
+      };
+      for (const [mid, mp] of Object.entries(r32Mappings)) {
+        updates[mid] = { teamAId: mp.teamA || null, teamBId: mp.teamB || null };
       }
-    }
 
-    // 7. Funções auxiliares para propagação dinâmica
-    const getWinnerId = (matchId) => {
-      const matchObj = updatedMatches.find(x => x.id === matchId);
-      if (!matchObj || matchObj.status !== 'finished') return null;
-      
-      const sA = parseInt(matchObj.officialScoreA, 10);
-      const sB = parseInt(matchObj.officialScoreB, 10);
-      if (isNaN(sA) || isNaN(sB)) return null;
-      
-      if (sA > sB) return matchObj.teamAId;
-      if (sB > sA) return matchObj.teamBId;
-      return matchObj.officialPenaltyWinnerId || null;
-    };
-
-    const getLoserId = (matchId) => {
-      const matchObj = updatedMatches.find(x => x.id === matchId);
-      if (!matchObj || matchObj.status !== 'finished') return null;
-      
-      const sA = parseInt(matchObj.officialScoreA, 10);
-      const sB = parseInt(matchObj.officialScoreB, 10);
-      if (isNaN(sA) || isNaN(sB)) return null;
-      
-      if (sA > sB) return matchObj.teamBId;
-      if (sB > sA) return matchObj.teamAId;
-      if (matchObj.officialPenaltyWinnerId === matchObj.teamAId) return matchObj.teamBId;
-      if (matchObj.officialPenaltyWinnerId === matchObj.teamBId) return matchObj.teamAId;
-      return null;
-    };
-
-    // Mapeamento das rodadas subsequentes (chaveamento FIFA oficial)
-    // Oitavas: Vencedor(m074) x Vencedor(m077), etc.
-    const r16Mappings = {
-      m089: { depA: 'm074', depB: 'm077' }, // Philly — 4/Jul 18h
-      m090: { depA: 'm073', depB: 'm075' }, // Houston — 4/Jul 14h
-      m091: { depA: 'm076', depB: 'm078' }, // MetLife — 5/Jul 17h
-      m092: { depA: 'm079', depB: 'm080' }, // Azteca — 5/Jul 21h
-      m093: { depA: 'm083', depB: 'm084' }, // AT&T Dallas — 6/Jul 15h
-      m094: { depA: 'm081', depB: 'm082' }, // Seattle — 6/Jul 20h
-      m095: { depA: 'm086', depB: 'm088' }, // Atlanta — 7/Jul 13h
-      m096: { depA: 'm085', depB: 'm087' }  // Vancouver — 7/Jul 17h
-    };
-
-    // Quartas: Vencedor(m089) x Vencedor(m090), etc.
-    const qfMappings = {
-      m097: { depA: 'm089', depB: 'm090' }, // Gillette/Boston — 9/Jul 17h
-      m098: { depA: 'm093', depB: 'm094' }, // SoFi/LA — 10/Jul 16h
-      m099: { depA: 'm091', depB: 'm092' }, // Hard Rock/Miami — 11/Jul 18h
-      m100: { depA: 'm095', depB: 'm096' }  // Arrowhead/KC — 11/Jul 21h
-    };
-
-    // Semis: Vencedor(m097) x Vencedor(m098), etc.
-    const sfMappings = {
-      m101: { depA: 'm097', depB: 'm098' }, // AT&T Dallas — 14/Jul 16h
-      m102: { depA: 'm099', depB: 'm100' }  // Mercedes-Benz Atlanta — 15/Jul 16h
-    };
-
-    // 3° Lugar (perdedores das semis) e Final (vencedores)
-    const finalMappings = {
-      m103: { depA: 'm101', depB: 'm102', isLosers: true },  // Hard Rock Miami — 18/Jul 18h
-      m104: { depA: 'm101', depB: 'm102', isLosers: false }  // MetLife NY/NJ — 19/Jul 16h
-    };
-
-    // 8. Propagação em cascata no array local
-    for (const m of updatedMatches) {
-      const mapping = r16Mappings[m.id];
-      if (mapping) {
-        m.teamAId = getWinnerId(mapping.depA);
-        m.teamBId = getWinnerId(mapping.depB);
+    } else if (selectedRound === 'round_16') {
+      // ── Oitavas: vencedores dos 16-avos ──
+      const deps = {
+        m089:{ depA:'m074', depB:'m077' },
+        m090:{ depA:'m073', depB:'m075' },
+        m091:{ depA:'m076', depB:'m078' },
+        m092:{ depA:'m079', depB:'m080' },
+        m093:{ depA:'m083', depB:'m084' },
+        m094:{ depA:'m081', depB:'m082' },
+        m095:{ depA:'m086', depB:'m088' },
+        m096:{ depA:'m085', depB:'m087' },
+      };
+      for (const [mid, dep] of Object.entries(deps)) {
+        updates[mid] = {
+          teamAId: getWinnerFromMatch(getMatch(dep.depA)),
+          teamBId: getWinnerFromMatch(getMatch(dep.depB)),
+        };
       }
+
+    } else if (selectedRound === 'round_qf') {
+      // ── Quartas: vencedores das oitavas ──
+      const deps = {
+        m097:{ depA:'m089', depB:'m090' },
+        m098:{ depA:'m093', depB:'m094' },
+        m099:{ depA:'m091', depB:'m092' },
+        m100:{ depA:'m095', depB:'m096' },
+      };
+      for (const [mid, dep] of Object.entries(deps)) {
+        updates[mid] = {
+          teamAId: getWinnerFromMatch(getMatch(dep.depA)),
+          teamBId: getWinnerFromMatch(getMatch(dep.depB)),
+        };
+      }
+
+    } else if (selectedRound === 'round_sf') {
+      // ── Semis: vencedores das quartas ──
+      const deps = {
+        m101:{ depA:'m097', depB:'m098' },
+        m102:{ depA:'m099', depB:'m100' },
+      };
+      for (const [mid, dep] of Object.entries(deps)) {
+        updates[mid] = {
+          teamAId: getWinnerFromMatch(getMatch(dep.depA)),
+          teamBId: getWinnerFromMatch(getMatch(dep.depB)),
+        };
+      }
+
+    } else if (selectedRound === 'third_place') {
+      // ── 3° lugar: perdedores das semis ──
+      updates['m103'] = {
+        teamAId: getLoserFromMatch(getMatch('m101')),
+        teamBId: getLoserFromMatch(getMatch('m102')),
+      };
+
+    } else if (selectedRound === 'final') {
+      // ── Final: vencedores das semis ──
+      updates['m104'] = {
+        teamAId: getWinnerFromMatch(getMatch('m101')),
+        teamBId: getWinnerFromMatch(getMatch('m102')),
+      };
+    } else {
+      alert('Esta rodada não possui preenchimento automático.');
+      return;
     }
 
-    for (const m of updatedMatches) {
-      const mapping = qfMappings[m.id];
-      if (mapping) {
-        m.teamAId = getWinnerId(mapping.depA);
-        m.teamBId = getWinnerId(mapping.depB);
-      }
-    }
-
-    for (const m of updatedMatches) {
-      const mapping = sfMappings[m.id];
-      if (mapping) {
-        m.teamAId = getWinnerId(mapping.depA);
-        m.teamBId = getWinnerId(mapping.depB);
-      }
-    }
-
-    for (const m of updatedMatches) {
-      const mapping = finalMappings[m.id];
-      if (mapping) {
-        if (mapping.isLosers) {
-          m.teamAId = getLoserId(mapping.depA);
-          m.teamBId = getLoserId(mapping.depB);
-        } else {
-          m.teamAId = getWinnerId(mapping.depA);
-          m.teamBId = getWinnerId(mapping.depB);
-        }
-      }
-    }
-
-    // 9. Gravar as mudanças em batch no Firestore
-    // Inclui: renomeação das rodadas + correção de horários/estádios + times dos confrontos
+    // Gravar somente as partidas desta rodada
     try {
       const batch = writeBatch(db);
-      
-      // Renomear nomes das rodadas no Firestore
-      const roundRenames = {
-        'round_32':    '16-avos de Final',
-        'round_16':    'Oitavas de Final',
-        'round_qf':    'Quartas de Final',
-        'round_sf':    'Semifinal',
-        'third_place': 'Disputa 3º Lugar',
-        'final':       'Final'
-      };
-      for (const [roundDocId, roundName] of Object.entries(roundRenames)) {
-        batch.set(doc(db, 'rounds', roundDocId), { name: roundName }, { merge: true });
-      }
-
       let count = 0;
-      for (const m of updatedMatches) {
-        const original = matches.find(x => x.id === m.id);
-        if (!original) continue;
-
-        const meta = allMatchMeta[m.id];
-        const hasTeamChange = original.teamAId !== m.teamAId || original.teamBId !== m.teamBId;
-        const hasMetadataChange = meta && (
-          original.stadium !== meta.stadium ||
-          original.city !== meta.city ||
-          original.kickoffLocal !== meta.kickoffLocal ||
-          original.roundName !== meta.roundName
-        );
-
-        if (hasTeamChange || hasMetadataChange) {
-          const updatePayload = {
-            teamAId: m.teamAId || null,
-            teamBId: m.teamBId || null
-          };
-          if (meta) {
-            updatePayload.stadium    = meta.stadium;
-            updatePayload.city       = meta.city;
-            updatePayload.kickoffLocal = meta.kickoffLocal;
-            updatePayload.roundName  = meta.roundName;
-          }
-          batch.update(doc(db, 'matches', m.id), updatePayload);
-          count++;
+      for (const [mid, upd] of Object.entries(updates)) {
+        const meta = ALL_MATCH_META[mid];
+        const payload = {
+          teamAId: upd.teamAId || null,
+          teamBId: upd.teamBId || null,
+        };
+        if (meta) {
+          payload.stadium     = meta.stadium;
+          payload.city        = meta.city;
+          payload.kickoffLocal= meta.kickoffLocal;
+          payload.roundName   = meta.roundName;
         }
+        batch.update(doc(db, 'matches', mid), payload);
+        count++;
       }
-      
+      // Renomear rodada (upsert idempotente)
+      const roundRenames = {
+        round_32:'16-avos de Final', round_16:'Oitavas de Final',
+        round_qf:'Quartas de Final', round_sf:'Semifinal',
+        third_place:'Disputa 3º Lugar', final:'Final',
+      };
+      if (roundRenames[selectedRound]) {
+        batch.set(doc(db,'rounds',selectedRound),{name:roundRenames[selectedRound]},{merge:true});
+      }
       await batch.commit();
-      alert(`✅ Mata-mata atualizado! Rodadas renomeadas (16-avos→Oitavas→Quartas→Semis→Final) e ${count} partidas corrigidas com horários oficiais da FIFA 2026.`);
-      fetchRounds();
+      alert(`✅ Times da rodada "${roundLabel}" preenchidos! (${count} partidas atualizadas)\n\nAs outras rodadas não foram alteradas.`);
       fetchMatches();
+      fetchRounds();
     } catch (err) {
       console.error(err);
-      alert("Erro ao salvar confrontos e metadados no Firestore.");
+      alert('Erro ao salvar os times da rodada.');
     }
   };
 
@@ -770,8 +674,8 @@ export function Admin() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '10px', flexWrap: 'wrap' }}>
             <h3>Resultados Oficiais</h3>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <Button onClick={handleAutoResolveKnockouts} style={{ background: 'var(--primary)', color: '#000', border: 'none', fontWeight: 600 }}>
-                ⚡ Auto-Preencher Mata-Mata
+              <Button onClick={handleFillCurrentRound} style={{ background: 'var(--primary)', color: '#000', border: 'none', fontWeight: 600 }}>
+                ⚡ Preencher Times desta Rodada
               </Button>
               <Button onClick={() => recalculateAllScores(false)} style={{ background: 'var(--success)', color: '#fff', border: 'none' }}>
                 🔄 Recalcular Pontos
@@ -891,16 +795,14 @@ function MatchRow({ match: m, teams, onSave, onUpdateTeams }) {
             <div style={{ flex:1, textAlign:'left', fontWeight:'bold', fontSize:'15px' }}>{teamBName}</div>
           </div>
 
-          {!isFinished && (
-            <div style={{ textAlign: 'center', marginTop: '4px' }}>
-              <button 
-                onClick={() => setIsEditing(true)}
-                style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '12px', textDecoration: 'underline' }}
-              >
-                ✏️ Editar Confronto
-              </button>
-            </div>
-          )}
+          <div style={{ textAlign: 'center', marginTop: '4px' }}>
+            <button 
+              onClick={() => setIsEditing(true)}
+              style={{ background: 'none', border: 'none', color: isFinished ? 'var(--warning)' : 'var(--primary)', cursor: 'pointer', fontSize: '12px', textDecoration: 'underline' }}
+            >
+              {isFinished ? '🔧 Corrigir Times' : '✏️ Editar Confronto'}
+            </button>
+          </div>
 
           {needsPenaltyWinner && !isFinished && (
             <div style={{ marginTop: '10px', padding: '10px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid rgba(212,168,67,0.3)', alignSelf: 'center' }}>
@@ -912,15 +814,13 @@ function MatchRow({ match: m, teams, onSave, onUpdateTeams }) {
             </div>
           )}
 
-          {!isFinished && (
-            <Button variant="secondary" onClick={() => {
+          <Button variant="secondary" onClick={() => {
               if (needsPenaltyWinner && !localPenaltyWinnerId) return alert('Selecione quem venceu nos pênaltis.');
               onSave(m.id, parseInt(localScoreA,10), parseInt(localScoreB,10), localPenaltyWinnerId);
             }}
               style={{ alignSelf:'center', padding:'6px 14px', fontSize:'12px', width:'auto', marginTop: '10px' }}>
-              Salvar Resultado Oficial
+              {isFinished ? '🔁 Corrigir Resultado' : 'Salvar Resultado Oficial'}
             </Button>
-          )}
           {isFinished && (
             <div style={{textAlign:'center', fontSize:'12px', color:'var(--success)', fontWeight:'bold'}}>✓ ENCERRADO ({m.officialScoreA} x {m.officialScoreB})</div>
           )}
